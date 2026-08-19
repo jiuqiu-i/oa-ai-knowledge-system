@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+    --font-sans: var(--oak-font-sans);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen bg-[var(--oak-background)] font-sans antialiased">
+  <!-- SLOT: sidebar -->
+  <aside class="fixed left-0 top-0 z-40 hidden h-full w-60 flex-col border-r border-[var(--oak-line)] bg-[var(--oak-ink)] md:flex">
+    <div class="flex h-16 items-center gap-2 px-5">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+        <i data-lucide="layers" class="h-5 w-5"></i>
+      </span>
+      <span class="text-lg font-semibold text-[var(--oak-surface)]">Oak OA 管理</span>
+    </div>
+    <nav class="flex flex-1 flex-col gap-1 px-3 py-4">
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-dashboard" data-menu-key="admin-dashboard">
+        <i data-lucide="layout-dashboard" class="h-4 w-4"></i> 管理概览
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md bg-[rgba(255,255,255,0.12)] px-3 py-2.5 text-sm font-medium text-[var(--oak-surface)] hover:bg-[rgba(255,255,255,0.16)]" data-dom-id="nav-admin-kb" data-menu-key="admin-kb" aria-current="page">
+        <i data-lucide="book-open" class="h-4 w-4"></i> 知识库管理
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]">
+        <i data-lucide="cpu" class="h-4 w-4"></i> AI 接入配置
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-members" data-menu-key="admin-members">
+        <i data-lucide="users" class="h-4 w-4"></i> 成员管理
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-approvals" data-menu-key="admin-approvals">
+        <i data-lucide="clipboard-check" class="h-4 w-4"></i> 审批管理
+      </a>
+    </nav>
+    <div class="border-t border-[rgba(255,255,255,0.1)] p-4">
+      <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-3)] hover:text-[var(--oak-surface)]" data-dom-id="nav-index">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i> 返回用户端
+      </a>
+    </div>
+  </aside>
+
+  <div class="flex min-h-screen flex-col md:pl-60">
+    <!-- SLOT: top-header -->
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--oak-line)] bg-[var(--oak-surface)] px-6">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl font-semibold text-[var(--oak-ink)]" data-slot="pageTitle">知识库管理</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden md:block">
+          <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          <input type="text" placeholder="搜索" class="h-9 w-64 rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-muted)] pl-9 pr-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" />
+        </div>
+        <button class="relative rounded-full p-2 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+          <i data-lucide="bell" class="h-5 w-5"></i>
+          <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--oak-state-error)]"></span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--oak-primary)] text-xs font-semibold text-[var(--oak-primary-foreground)]">管</span>
+          <span class="hidden text-sm font-medium text-[var(--oak-ink)] lg:inline">管理员</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-6">
+      <!-- Top toolbar -->
+      <div class="mb-6 flex flex-col gap-4 rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-4 shadow-[var(--oak-shadow-1)] sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative w-full sm:w-auto">
+          <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          <input type="text" placeholder="搜索文档名称、作者..." class="h-9 w-full rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-muted)] pl-9 pr-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)] sm:w-80" />
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="inline-flex items-center gap-2 rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+            <i data-lucide="folder-plus" class="h-4 w-4 text-[var(--oak-primary)]"></i> 新建分类
+          </button>
+          <button id="btn-upload-doc" class="inline-flex items-center gap-2 rounded-[var(--oak-radius-medium)] bg-[var(--oak-primary)] px-4 py-2 text-sm font-medium text-[var(--oak-primary-foreground)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)] focus:ring-offset-1">
+            <i data-lucide="upload" class="h-4 w-4"></i> 上传文档
+          </button>
+          <div class="relative inline-flex">
+            <select class="h-9 appearance-none rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] pl-3 pr-8 text-sm text-[var(--oak-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+              <option>批量操作</option>
+              <option>批量发布</option>
+              <option>批量归档</option>
+              <option>批量删除</option>
+            </select>
+            <i data-lucide="chevron-down" class="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="flex min-h-[calc(100vh-14rem)] gap-6">
+        <!-- Left category tree (260px) -->
+        <aside class="hidden w-[260px] shrink-0 flex-col gap-4 md:flex">
+          <div class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-4 shadow-[var(--oak-shadow-1)]">
+            <div class="mb-3 flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-[var(--oak-ink)]">文档分类</h2>
+              <button class="rounded-[var(--oak-radius-small)] p-1 text-[var(--oak-ink-3)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]">
+                <i data-lucide="plus" class="h-4 w-4"></i>
+              </button>
+            </div>
+            <ul class="space-y-1">
+              <li>
+                <details class="group" open>
+                  <summary class="flex cursor-pointer list-none items-center justify-between rounded-[var(--oak-radius-medium)] px-3 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">
+                    <span class="flex items-center gap-2">
+                      <i data-lucide="folder" class="h-4 w-4 text-[var(--oak-primary)]"></i> 产品文档
+                    </span>
+                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-[var(--oak-ink-3)] transition-transform group-open:rotate-90"></i>
+                  </summary>
+                  <ul class="mt-1 space-y-1 pl-8">
+                    <li><button class="w-full rounded-[var(--oak-radius-small)] px-2 py-1.5 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">需求文档</button></li>
+                    <li><button class="w-full rounded-[var(--oak-radius-small)] px-2 py-1.5 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">用户手册</button></li>
+                  </ul>
+                </details>
+              </li>
+              <li>
+                <details class="group" open>
+                  <summary class="flex cursor-pointer list-none items-center justify-between rounded-[var(--oak-radius-medium)] px-3 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">
+                    <span class="flex items-center gap-2">
+                      <i data-lucide="folder" class="h-4 w-4 text-[var(--oak-primary)]"></i> 研发规范
+                    </span>
+                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-[var(--oak-ink-3)] transition-transform group-open:rotate-90"></i>
+                  </summary>
+                  <ul class="mt-1 space-y-1 pl-8">
+                    <li><button class="w-full rounded-[var(--oak-radius-small)] px-2 py-1.5 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">前端规范</button></li>
+                    <li><button class="w-full rounded-[var(--oak-radius-small)] px-2 py-1.5 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">API 文档</button></li>
+                  </ul>
+                </details>
+              </li>
+              <li>
+                <details class="group">
+                  <summary class="flex cursor-pointer list-none items-center justify-between rounded-[var(--oak-radius-medium)] px-3 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">
+                    <span class="flex items-center gap-2">
+                      <i data-lucide="folder" class="h-4 w-4 text-[var(--oak-primary)]"></i> 销售手册
+                    </span>
+                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-[var(--oak-ink-3)] transition-transform group-open:rotate-90"></i>
+                  </summary>
+                </details>
+              </li>
+              <li>
+                <details class="group">
+                  <summary class="flex cursor-pointer list-none items-center justify-between rounded-[var(--oak-radius-medium)] px-3 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">
+                    <span class="flex items-center gap-2">
+                      <i data-lucide="folder" class="h-4 w-4 text-[var(--oak-primary)]"></i> 人事制度
+                    </span>
+                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-[var(--oak-ink-3)] transition-transform group-open:rotate-90"></i>
+                  </summary>
+                </details>
+              </li>
+              <li>
+                <details class="group">
+                  <summary class="flex cursor-pointer list-none items-center justify-between rounded-[var(--oak-radius-medium)] px-3 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">
+                    <span class="flex items-center gap-2">
+                      <i data-lucide="folder" class="h-4 w-4 text-[var(--oak-primary)]"></i> 培训资料
+                    </span>
+                    <i data-lucide="chevron-right" class="h-3.5 w-3.5 text-[var(--oak-ink-3)] transition-transform group-open:rotate-90"></i>
+                  </summary>
+                </details>
+              </li>
+              <li>
+                <button class="flex w-full items-center gap-2 rounded-[var(--oak-radius-medium)] px-3 py-2 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+                  <i data-lucide="folder-x" class="h-4 w-4"></i> 未分类
+                </button>
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- Right document table -->
+        <section class="flex flex-1 flex-col rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] shadow-[var(--oak-shadow-1)]">
+          <div class="flex-1 overflow-x-auto">
+            <table class="w-full min-w-[720px] text-left text-sm">
+              <thead class="bg-[var(--oak-muted)] text-[var(--oak-ink-2)]">
+                <tr>
+                  <th class="w-10 px-4 py-3 font-medium">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </th>
+                  <th class="px-4 py-3 font-medium">文档名称</th>
+                  <th class="px-4 py-3 font-medium">所属分类</th>
+                  <th class="px-4 py-3 font-medium">作者</th>
+                  <th class="px-4 py-3 font-medium">更新时间</th>
+                  <th class="px-4 py-3 font-medium">状态</th>
+                  <th class="px-4 py-3 text-right font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--oak-line)] text-[var(--oak-ink)]">
+                <tr class="transition-colors hover:bg-[var(--oak-muted)]">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </td>
+                  <td class="px-4 py-3 font-medium">Oak OA 产品白皮书 v2.0</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">产品文档 / 需求文档</td>
+                  <td class="px-4 py-3">林晓</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">2026-08-15</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-[rgba(52,168,83,0.12)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-state-success)]">已发布</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-edit-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-action="edit" title="编辑">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-delete-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" data-action="delete" title="删除">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="transition-colors hover:bg-[var(--oak-muted)]">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </td>
+                  <td class="px-4 py-3 font-medium">销售话术与竞品对比 Q3</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">销售手册</td>
+                  <td class="px-4 py-3">王磊</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">2026-08-14</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-[rgba(245,184,0,0.15)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-state-warning)]">草稿</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-edit-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-action="edit" title="编辑">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-delete-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" data-action="delete" title="删除">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="transition-colors hover:bg-[var(--oak-muted)]">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </td>
+                  <td class="px-4 py-3 font-medium">前端代码规范 v3.1</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">研发规范 / 前端规范</td>
+                  <td class="px-4 py-3">陈晨</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">2026-08-12</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-[rgba(52,168,83,0.12)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-state-success)]">已发布</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-edit-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-action="edit" title="编辑">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-delete-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" data-action="delete" title="删除">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="transition-colors hover:bg-[var(--oak-muted)]">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </td>
+                  <td class="px-4 py-3 font-medium">新员工入职指南</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">人事制度</td>
+                  <td class="px-4 py-3">赵敏</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">2026-08-10</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-[rgba(110,102,91,0.12)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-ink-2)]">已归档</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-edit-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-action="edit" title="编辑">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-delete-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" data-action="delete" title="删除">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="transition-colors hover:bg-[var(--oak-muted)]">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </td>
+                  <td class="px-4 py-3 font-medium">AI 接入配置说明</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">产品文档 / 用户手册</td>
+                  <td class="px-4 py-3">刘洋</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">2026-08-09</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-[rgba(52,168,83,0.12)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-state-success)]">已发布</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-edit-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-action="edit" title="编辑">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-delete-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" data-action="delete" title="删除">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="transition-colors hover:bg-[var(--oak-muted)]">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" class="h-4 w-4 rounded border-[var(--oak-line)] text-[var(--oak-primary)] focus:ring-[var(--oak-ring)]" />
+                  </td>
+                  <td class="px-4 py-3 font-medium">培训资料：高效会议管理</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">培训资料</td>
+                  <td class="px-4 py-3">孙婷</td>
+                  <td class="px-4 py-3 text-[var(--oak-ink-2)]">2026-08-08</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center rounded-full bg-[rgba(245,184,0,0.15)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-state-warning)]">草稿</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1">
+                      <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-edit-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-action="edit" title="编辑">
+                        <i data-lucide="pencil" class="h-4 w-4"></i>
+                      </button>
+                      <button class="btn-delete-doc rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" data-action="delete" title="删除">
+                        <i data-lucide="trash-2" class="h-4 w-4"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--oak-line)] px-4 py-3">
+            <span class="text-sm text-[var(--oak-ink-3)]">共 124 条，每页 10 条</span>
+            <div class="flex items-center gap-2">
+              <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] border border-[var(--oak-line)] bg-[var(--oak-surface)] text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] disabled:opacity-40" disabled>
+                <i data-lucide="chevron-left" class="h-4 w-4"></i>
+              </button>
+              <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] bg-[var(--oak-primary)] text-sm font-medium text-[var(--oak-primary-foreground)]">1</button>
+              <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">2</button>
+              <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">3</button>
+              <span class="px-1 text-[var(--oak-ink-3)]">...</span>
+              <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">13</button>
+              <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] border border-[var(--oak-line)] bg-[var(--oak-surface)] text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+                <i data-lucide="chevron-right" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- 文档弹窗 -->
+  <div id="doc-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
+    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-3)]">
+      <div class="mb-5 flex items-center justify-between">
+        <h3 id="doc-modal-title" class="text-lg font-semibold text-[var(--oak-ink)]">上传/新增文档</h3>
+        <button type="button" class="btn-modal-close rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-3)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+      <form id="doc-form" class="space-y-4">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-[var(--oak-ink)]">文档标题</label>
+          <input name="title" type="text" required class="h-10 w-full rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" placeholder="请输入文档标题" />
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-[var(--oak-ink)]">所属分类</label>
+          <div class="relative">
+            <select name="category" required class="h-10 w-full appearance-none rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 pr-8 text-sm text-[var(--oak-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+              <option value="">请选择分类</option>
+              <option>产品文档 / 需求文档</option>
+              <option>产品文档 / 用户手册</option>
+              <option>研发规范 / 前端规范</option>
+              <option>研发规范 / API 文档</option>
+              <option>销售手册</option>
+              <option>人事制度</option>
+              <option>培训资料</option>
+              <option>未分类</option>
+            </select>
+            <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          </div>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-[var(--oak-ink)]">作者</label>
+          <input name="author" type="text" required class="h-10 w-full rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" placeholder="请输入作者" />
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-[var(--oak-ink)]">状态</label>
+          <div class="relative">
+            <select name="status" required class="h-10 w-full appearance-none rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 pr-8 text-sm text-[var(--oak-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+              <option value="已发布">已发布</option>
+              <option value="草稿">草稿</option>
+              <option value="已归档">已归档</option>
+            </select>
+            <i data-lucide="chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          </div>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-[var(--oak-ink)]">文档内容</label>
+          <textarea name="content" rows="5" class="w-full resize-none rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" placeholder="请输入文档内容"></textarea>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-[var(--oak-ink)]">上传附件</label>
+          <div id="upload-dropzone" class="cursor-pointer rounded-[var(--oak-radius-medium)] border border-dashed border-[var(--oak-line)] bg-[var(--oak-muted)] p-6 text-center transition-colors hover:border-[var(--oak-primary)] hover:bg-[var(--oak-surface)]">
+            <i data-lucide="upload-cloud" class="mx-auto mb-2 h-8 w-8 text-[var(--oak-ink-3)]"></i>
+            <p class="text-sm text-[var(--oak-ink-2)]">点击选择文件（演示）</p>
+            <p id="file-name" class="mt-1 text-xs text-[var(--oak-ink-3)]"></p>
+            <input id="file-input" type="file" class="hidden" />
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" class="btn-modal-close inline-flex items-center gap-2 rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">取消</button>
+          <button type="submit" class="inline-flex items-center gap-2 rounded-[var(--oak-radius-medium)] bg-[var(--oak-primary)] px-4 py-2 text-sm font-medium text-[var(--oak-primary-foreground)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 删除确认弹窗 -->
+  <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm" aria-modal="true" role="dialog">
+    <div class="w-full max-w-sm rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 text-center shadow-[var(--oak-shadow-3)]">
+      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(234,67,53,0.12)] text-[var(--oak-state-error)]">
+        <i data-lucide="trash-2" class="h-6 w-6"></i>
+      </div>
+      <h3 class="mb-2 text-lg font-semibold text-[var(--oak-ink)]">确认删除</h3>
+      <p id="delete-modal-text" class="mb-6 text-sm text-[var(--oak-ink-2)]">确定要删除该文档吗？</p>
+      <div class="flex items-center justify-center gap-3">
+        <button id="btn-cancel-delete" class="rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">取消</button>
+        <button id="btn-confirm-delete" class="rounded-[var(--oak-radius-medium)] bg-[var(--oak-state-error)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--oak-state-error)]">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var docModal = document.getElementById('doc-modal');
+      var deleteModal = document.getElementById('delete-modal');
+      var docForm = document.getElementById('doc-form');
+      var modalTitle = document.getElementById('doc-modal-title');
+      var uploadBtn = document.getElementById('btn-upload-doc');
+      var dropzone = document.getElementById('upload-dropzone');
+      var fileInput = document.getElementById('file-input');
+      var fileNameEl = document.getElementById('file-name');
+      var deleteText = document.getElementById('delete-modal-text');
+      var cancelDelete = document.getElementById('btn-cancel-delete');
+      var confirmDelete = document.getElementById('btn-confirm-delete');
+      var currentDeleteRow = null;
+
+      function openDocModal(mode, row) {
+        docForm.reset();
+        fileNameEl.textContent = '';
+        if (mode === 'edit' && row) {
+          modalTitle.textContent = '编辑文档';
+          var cells = row.cells;
+          docForm.elements['title'].value = cells[1].textContent.trim();
+          docForm.elements['category'].value = cells[2].textContent.trim();
+          docForm.elements['author'].value = cells[3].textContent.trim();
+          docForm.elements['status'].value = cells[5].textContent.trim();
+          docModal.dataset.mode = 'edit';
+        } else {
+          modalTitle.textContent = '上传/新增文档';
+          docModal.dataset.mode = 'upload';
+        }
+        docModal.classList.remove('hidden');
+      }
+
+      function closeDocModal() {
+        docModal.classList.add('hidden');
+      }
+
+      function openDeleteModal(row) {
+        currentDeleteRow = row;
+        var title = row.cells[1].textContent.trim();
+        deleteText.textContent = '确定要删除《' + title + '》吗？';
+        deleteModal.classList.remove('hidden');
+      }
+
+      function closeDeleteModal() {
+        currentDeleteRow = null;
+        deleteModal.classList.add('hidden');
+      }
+
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', function () {
+          openDocModal('upload');
+        });
+      }
+
+      document.querySelectorAll('.btn-modal-close').forEach(function (btn) {
+        btn.addEventListener('click', closeDocModal);
+      });
+
+      docModal.addEventListener('click', function (e) {
+        if (e.target === docModal) closeDocModal();
+      });
+
+      deleteModal.addEventListener('click', function (e) {
+        if (e.target === deleteModal) closeDeleteModal();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          if (!docModal.classList.contains('hidden')) closeDocModal();
+          if (!deleteModal.classList.contains('hidden')) closeDeleteModal();
+        }
+      });
+
+      docForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var formData = {
+          mode: docModal.dataset.mode,
+          title: docForm.elements['title'].value,
+          category: docForm.elements['category'].value,
+          author: docForm.elements['author'].value,
+          status: docForm.elements['status'].value,
+          content: docForm.elements['content'].value,
+          attachment: fileInput.files[0] ? fileInput.files[0].name : null
+        };
+        console.log('文档提交:', formData);
+        closeDocModal();
+      });
+
+      if (dropzone && fileInput) {
+        dropzone.addEventListener('click', function () {
+          fileInput.click();
+        });
+        fileInput.addEventListener('change', function () {
+          if (fileInput.files && fileInput.files[0]) {
+            fileNameEl.textContent = '已选择：' + fileInput.files[0].name;
+          } else {
+            fileNameEl.textContent = '';
+          }
+        });
+      }
+
+      var tableBody = document.querySelector('table tbody');
+      if (tableBody) {
+        tableBody.addEventListener('click', function (e) {
+          var editBtn = e.target.closest('.btn-edit-doc');
+          var deleteBtn = e.target.closest('.btn-delete-doc');
+          if (editBtn) {
+            e.preventDefault();
+            var row = editBtn.closest('tr');
+            openDocModal('edit', row);
+          } else if (deleteBtn) {
+            e.preventDefault();
+            var row = deleteBtn.closest('tr');
+            openDeleteModal(row);
+          }
+        });
+      }
+
+      cancelDelete.addEventListener('click', closeDeleteModal);
+
+      confirmDelete.addEventListener('click', function () {
+        if (currentDeleteRow) {
+          currentDeleteRow.remove();
+          console.log('已删除文档:', currentDeleteRow.cells[1].textContent.trim());
+        }
+        closeDeleteModal();
+      });
+    })();
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

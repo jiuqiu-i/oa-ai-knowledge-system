@@ -1,0 +1,474 @@
+{
+  "data": [
+    {
+      "id": "page-index",
+      "title": "首页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1916,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-53020a42",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/index.html",
+        "interactions": [
+          {
+            "domId": "nav-user-home",
+            "targetPageId": "page-user-home",
+            "hideEdge": true,
+            "transitionLabel": "打开工作台"
+          },
+          {
+            "domId": "nav-kb-explore",
+            "targetPageId": "page-kb-explore",
+            "hideEdge": true,
+            "transitionLabel": "浏览知识库"
+          },
+          {
+            "domId": "nav-ai-assistant",
+            "targetPageId": "page-ai-assistant",
+            "hideEdge": true,
+            "transitionLabel": "打开 AI 助手"
+          },
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "进入管理端"
+          },
+          {
+            "domId": "nav-login",
+            "targetPageId": "page-login",
+            "hideEdge": true,
+            "transitionLabel": "登录"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-user-home",
+      "title": "我的工作台",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 480,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1278,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-25e6b2a4",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/user-home.html",
+        "interactions": [
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "nav-kb-explore",
+            "targetPageId": "page-kb-explore",
+            "hideEdge": true,
+            "transitionLabel": "浏览知识库"
+          },
+          {
+            "domId": "nav-ai-assistant",
+            "targetPageId": "page-ai-assistant",
+            "hideEdge": true,
+            "transitionLabel": "打开 AI 助手"
+          },
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "进入管理端"
+          },
+          {
+            "domId": "nav-login",
+            "targetPageId": "page-login",
+            "hideEdge": true,
+            "transitionLabel": "登录"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-kb-explore",
+      "title": "知识库",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 960,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1330,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-82ce54a1",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/kb-explore.html",
+        "interactions": [
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "nav-user-home",
+            "targetPageId": "page-user-home",
+            "hideEdge": true,
+            "transitionLabel": "打开工作台"
+          },
+          {
+            "domId": "nav-ai-assistant",
+            "targetPageId": "page-ai-assistant",
+            "hideEdge": true,
+            "transitionLabel": "打开 AI 助手"
+          },
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "进入管理端"
+          },
+          {
+            "domId": "nav-login",
+            "targetPageId": "page-login",
+            "hideEdge": true,
+            "transitionLabel": "登录"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-ai-assistant",
+      "title": "AI 助手",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 1440,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1010,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-1ac18e20",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/ai-assistant.html",
+        "interactions": [
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "nav-user-home",
+            "targetPageId": "page-user-home",
+            "hideEdge": true,
+            "transitionLabel": "打开工作台"
+          },
+          {
+            "domId": "nav-kb-explore",
+            "targetPageId": "page-kb-explore",
+            "hideEdge": true,
+            "transitionLabel": "浏览知识库"
+          },
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "进入管理端"
+          },
+          {
+            "domId": "nav-login",
+            "targetPageId": "page-login",
+            "hideEdge": true,
+            "transitionLabel": "登录"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-login",
+      "title": "登录",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 1920,
+        "y": 0,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-59d0fc4e",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/login.html",
+        "interactions": [
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回首页"
+          },
+          {
+            "domId": "nav-user-home",
+            "targetPageId": "page-user-home",
+            "hideEdge": true,
+            "transitionLabel": "登录后进入工作台"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-admin-dashboard",
+      "title": "管理概览",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 0,
+        "y": -564,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 1349,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-4c6fc660",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/admin-dashboard.html",
+        "interactions": [
+          {
+            "domId": "nav-admin-kb",
+            "targetPageId": "page-admin-kb",
+            "hideEdge": true,
+            "transitionLabel": "知识库管理"
+          },
+          {
+            "domId": "nav-admin-members",
+            "targetPageId": "page-admin-members",
+            "hideEdge": true,
+            "transitionLabel": "成员管理"
+          },
+          {
+            "domId": "nav-admin-approvals",
+            "targetPageId": "page-admin-approvals",
+            "hideEdge": true,
+            "transitionLabel": "审批管理"
+          },
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回用户端"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-admin-kb",
+      "title": "知识库管理",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1786889800000,
+      "canvasData": {
+        "x": 480,
+        "y": -564,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-1092e14e",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/admin-kb.html",
+        "interactions": [
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "管理概览"
+          },
+          {
+            "domId": "nav-admin-members",
+            "targetPageId": "page-admin-members",
+            "hideEdge": true,
+            "transitionLabel": "成员管理"
+          },
+          {
+            "domId": "nav-admin-approvals",
+            "targetPageId": "page-admin-approvals",
+            "hideEdge": true,
+            "transitionLabel": "审批管理"
+          },
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回用户端"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-admin-members",
+      "title": "成员管理",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787099800000,
+      "canvasData": {
+        "x": 960,
+        "y": -564,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-e085f4f7",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/admin-members.html",
+        "interactions": [
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "管理概览"
+          },
+          {
+            "domId": "nav-admin-kb",
+            "targetPageId": "page-admin-kb",
+            "hideEdge": true,
+            "transitionLabel": "知识库管理"
+          },
+          {
+            "domId": "nav-admin-approvals",
+            "targetPageId": "page-admin-approvals",
+            "hideEdge": true,
+            "transitionLabel": "审批管理"
+          },
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回用户端"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-admin-approvals",
+      "title": "审批管理",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1787099900000,
+      "canvasData": {
+        "x": 1440,
+        "y": -564,
+        "group": 0,
+        "layoutSnapshot": {
+          "version": 1,
+          "contentHeight": 900,
+          "viewportWidth": 1440,
+          "sourceHash": "fnv1a-3d736032",
+          "measuredAt": 1787118540941
+        }
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/admin-approvals.html",
+        "interactions": [
+          {
+            "domId": "nav-admin-dashboard",
+            "targetPageId": "page-admin-dashboard",
+            "hideEdge": true,
+            "transitionLabel": "管理概览"
+          },
+          {
+            "domId": "nav-admin-kb",
+            "targetPageId": "page-admin-kb",
+            "hideEdge": true,
+            "transitionLabel": "知识库管理"
+          },
+          {
+            "domId": "nav-admin-members",
+            "targetPageId": "page-admin-members",
+            "hideEdge": true,
+            "transitionLabel": "成员管理"
+          },
+          {
+            "domId": "nav-index",
+            "targetPageId": "page-index",
+            "hideEdge": true,
+            "transitionLabel": "返回用户端"
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "首页主视觉：团队协作与 AI 知识库办公场景",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1786889900000,
+      "canvasData": {
+        "x": 0,
+        "y": 669,
+        "naturalSize": {
+          "width": 2560,
+          "height": 1440
+        }
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-main.jpg"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": false,
+    "deviceType": "desktop",
+    "projectName": "AI 知识库 OA 系统",
+    "designLibrary": null,
+    "showEdge": false,
+    "visualEditorEnabled": false
+  }
+}

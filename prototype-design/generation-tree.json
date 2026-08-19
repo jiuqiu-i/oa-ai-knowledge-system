@@ -1,0 +1,42 @@
+{
+  "nodeId": "gen-project-root",
+  "kind": "project-shell",
+  "pageIds": ["page-index", "page-user-home", "page-kb-explore", "page-ai-assistant", "page-admin-dashboard", "page-admin-kb"],
+  "output": "partials/project-root.html",
+  "sharedRegions": [],
+  "privateRegions": [],
+  "mutableSlots": [],
+  "status": "planned",
+  "children": [
+    {
+      "nodeId": "gen-user-shell",
+      "kind": "shared-branch",
+      "pageIds": ["page-index", "page-user-home", "page-kb-explore", "page-ai-assistant"],
+      "output": "partials/user-shell.html",
+      "sharedRegions": ["top-nav", "footer"],
+      "privateRegions": ["main-content"],
+      "mutableSlots": ["activeNavItem", "pageTitle"],
+      "status": "planned",
+      "children": [
+        { "nodeId": "gen-page-index", "kind": "page-leaf", "pageIds": ["page-index"], "output": "pages/index.html", "sharedRegions": ["top-nav", "footer"], "privateRegions": ["main-content"], "mutableSlots": ["activeNavItem", "pageTitle"], "status": "planned", "children": [] },
+        { "nodeId": "gen-page-user-home", "kind": "page-leaf", "pageIds": ["page-user-home"], "output": "pages/user-home.html", "sharedRegions": ["top-nav", "footer"], "privateRegions": ["main-content"], "mutableSlots": ["activeNavItem", "pageTitle"], "status": "planned", "children": [] },
+        { "nodeId": "gen-page-kb-explore", "kind": "page-leaf", "pageIds": ["page-kb-explore"], "output": "pages/kb-explore.html", "sharedRegions": ["top-nav", "footer"], "privateRegions": ["main-content"], "mutableSlots": ["activeNavItem", "pageTitle"], "status": "planned", "children": [] },
+        { "nodeId": "gen-page-ai-assistant", "kind": "page-leaf", "pageIds": ["page-ai-assistant"], "output": "pages/ai-assistant.html", "sharedRegions": ["top-nav", "footer"], "privateRegions": ["main-content"], "mutableSlots": ["activeNavItem", "pageTitle"], "status": "planned", "children": [] }
+      ]
+    },
+    {
+      "nodeId": "gen-admin-shell",
+      "kind": "shared-branch",
+      "pageIds": ["page-admin-dashboard", "page-admin-kb"],
+      "output": "partials/admin-shell.html",
+      "sharedRegions": ["sidebar", "top-header"],
+      "privateRegions": ["main-content"],
+      "mutableSlots": ["activeMenuItem", "pageTitle"],
+      "status": "planned",
+      "children": [
+        { "nodeId": "gen-page-admin-dashboard", "kind": "page-leaf", "pageIds": ["page-admin-dashboard"], "output": "pages/admin-dashboard.html", "sharedRegions": ["sidebar", "top-header"], "privateRegions": ["main-content"], "mutableSlots": ["activeMenuItem", "pageTitle"], "status": "planned", "children": [] },
+        { "nodeId": "gen-page-admin-kb", "kind": "page-leaf", "pageIds": ["page-admin-kb"], "output": "pages/admin-kb.html", "sharedRegions": ["sidebar", "top-header"], "privateRegions": ["main-content"], "mutableSlots": ["activeMenuItem", "pageTitle"], "status": "planned", "children": [] }
+      ]
+    }
+  ]
+}

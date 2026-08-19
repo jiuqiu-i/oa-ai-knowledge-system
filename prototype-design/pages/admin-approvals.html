@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>审批管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+    --font-sans: var(--oak-font-sans);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+      .drawer-enter { transform: translateX(100%); }
+      .drawer-enter-active { transform: translateX(0); }
+      .drawer-exit { transform: translateX(0); }
+      .drawer-exit-active { transform: translateX(100%); }
+      .approval-row-hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-[var(--oak-background)] font-sans antialiased">
+  <!-- SLOT: sidebar -->
+  <aside class="fixed left-0 top-0 z-40 hidden h-full w-60 flex-col border-r border-[var(--oak-line)] bg-[var(--oak-ink)] md:flex">
+    <div class="flex h-16 items-center gap-2 px-5">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+        <i data-lucide="layers" class="h-5 w-5"></i>
+      </span>
+      <span class="text-lg font-semibold text-[var(--oak-surface)]">Oak OA 管理</span>
+    </div>
+    <nav class="flex flex-1 flex-col gap-1 px-3 py-4">
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-dashboard" data-menu-key="admin-dashboard">
+        <i data-lucide="layout-dashboard" class="h-4 w-4"></i> 管理概览
+      </a>
+      <a href="admin-kb.html" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-kb" data-menu-key="admin-kb">
+        <i data-lucide="book-open" class="h-4 w-4"></i> 知识库管理
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]">
+        <i data-lucide="cpu" class="h-4 w-4"></i> AI 接入配置
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-members" data-menu-key="admin-members">
+        <i data-lucide="users" class="h-4 w-4"></i> 成员管理
+      </a>
+      <a href="admin-approvals.html" class="admin-menu-item flex items-center gap-3 rounded-md bg-[rgba(255,255,255,0.12)] px-3 py-2.5 text-sm font-medium text-[var(--oak-surface)] hover:bg-[rgba(255,255,255,0.16)]" data-dom-id="nav-admin-approvals" data-menu-key="admin-approvals" aria-current="page">
+        <i data-lucide="clipboard-check" class="h-4 w-4"></i> 审批管理
+      </a>
+    </nav>
+    <div class="border-t border-[rgba(255,255,255,0.1)] p-4">
+      <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-3)] hover:text-[var(--oak-surface)]" data-dom-id="nav-index">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i> 返回用户端
+      </a>
+    </div>
+  </aside>
+
+  <div class="flex min-h-screen flex-col md:pl-60">
+    <!-- SLOT: top-header -->
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[var(--oak-line)] bg-[var(--oak-surface)] px-6">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl font-semibold text-[var(--oak-ink)]" data-slot="pageTitle">审批管理</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden md:block">
+          <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          <input type="text" placeholder="搜索" class="h-9 w-64 rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-muted)] pl-9 pr-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" />
+        </div>
+        <button class="relative rounded-full p-2 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+          <i data-lucide="bell" class="h-5 w-5"></i>
+          <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--oak-state-error)]"></span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--oak-primary)] text-xs font-semibold text-[var(--oak-primary-foreground)]">管</span>
+          <span class="hidden text-sm font-medium text-[var(--oak-ink)] lg:inline">管理员</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-6">
+      <!-- Stats cards -->
+      <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-medium text-[var(--oak-ink-2)]">待审批</span>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(245,184,0,0.12)] text-[var(--oak-state-warning)]">
+              <i data-lucide="clock" class="h-4 w-4"></i>
+            </span>
+          </div>
+          <div class="text-3xl font-semibold text-[var(--oak-ink)]">12</div>
+          <div class="mt-1 flex items-center gap-1 text-xs text-[var(--oak-state-success)]">
+            <i data-lucide="trending-up" class="h-3 w-3"></i>
+            <span>环比 +8.3%</span>
+          </div>
+        </div>
+        <div class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-medium text-[var(--oak-ink-2)]">审批中</span>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(46,144,250,0.12)] text-[var(--oak-state-info)]">
+              <i data-lucide="loader" class="h-4 w-4"></i>
+            </span>
+          </div>
+          <div class="text-3xl font-semibold text-[var(--oak-ink)]">8</div>
+          <div class="mt-1 flex items-center gap-1 text-xs text-[var(--oak-state-error)]">
+            <i data-lucide="trending-down" class="h-3 w-3"></i>
+            <span>环比 -4.1%</span>
+          </div>
+        </div>
+        <div class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-medium text-[var(--oak-ink-2)]">已通过</span>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(52,168,83,0.12)] text-[var(--oak-state-success)]">
+              <i data-lucide="check-circle" class="h-4 w-4"></i>
+            </span>
+          </div>
+          <div class="text-3xl font-semibold text-[var(--oak-ink)]">56</div>
+          <div class="mt-1 flex items-center gap-1 text-xs text-[var(--oak-state-success)]">
+            <i data-lucide="trending-up" class="h-3 w-3"></i>
+            <span>环比 +12.7%</span>
+          </div>
+        </div>
+        <div class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-sm font-medium text-[var(--oak-ink-2)]">已驳回</span>
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(234,67,53,0.12)] text-[var(--oak-state-error)]">
+              <i data-lucide="x-circle" class="h-4 w-4"></i>
+            </span>
+          </div>
+          <div class="text-3xl font-semibold text-[var(--oak-ink)]">7</div>
+          <div class="mt-1 flex items-center gap-1 text-xs text-[var(--oak-ink-3)]">
+            <i data-lucide="minus" class="h-3 w-3"></i>
+            <span>环比持平</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="mb-6 flex flex-col gap-4 rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-4 shadow-[var(--oak-shadow-1)] lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div class="relative w-full sm:w-72">
+            <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+            <input id="searchInput" type="text" placeholder="按标题/申请人搜索..." class="h-9 w-full rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-muted)] pl-9 pr-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" />
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="relative inline-flex">
+              <select id="typeFilter" class="h-9 appearance-none rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] pl-3 pr-8 text-sm text-[var(--oak-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+                <option value="">全部类型</option>
+                <option value="leave">请假</option>
+                <option value="reimburse">报销</option>
+                <option value="purchase">采购</option>
+                <option value="seal">用印</option>
+              </select>
+              <i data-lucide="chevron-down" class="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+            </div>
+            <div class="relative inline-flex">
+              <select id="statusFilter" class="h-9 appearance-none rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] pl-3 pr-8 text-sm text-[var(--oak-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+                <option value="">全部状态</option>
+                <option value="pending">待审批</option>
+                <option value="processing">审批中</option>
+                <option value="approved">已通过</option>
+                <option value="rejected">已驳回</option>
+              </select>
+              <i data-lucide="chevron-down" class="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+            </div>
+          </div>
+        </div>
+        <button class="inline-flex items-center justify-center gap-2 rounded-[var(--oak-radius-medium)] bg-[var(--oak-primary)] px-4 py-2 text-sm font-medium text-[var(--oak-primary-foreground)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)] focus:ring-offset-1" onclick="showToast('已打开发起审批面板', 'info')">
+          <i data-lucide="plus" class="h-4 w-4"></i> 发起审批
+        </button>
+      </div>
+
+      <!-- Approval table -->
+      <section class="flex flex-col rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] shadow-[var(--oak-shadow-1)]">
+        <div class="flex-1 overflow-x-auto">
+          <table class="w-full min-w-[900px] text-left text-sm">
+            <thead class="bg-[var(--oak-muted)] text-[var(--oak-ink-2)]">
+              <tr>
+                <th class="px-4 py-3 font-medium">审批标题</th>
+                <th class="px-4 py-3 font-medium">申请人</th>
+                <th class="px-4 py-3 font-medium">类型</th>
+                <th class="px-4 py-3 font-medium">金额</th>
+                <th class="px-4 py-3 font-medium">提交时间</th>
+                <th class="px-4 py-3 font-medium">当前审批人</th>
+                <th class="px-4 py-3 font-medium">状态</th>
+                <th class="px-4 py-3 text-right font-medium">操作</th>
+              </tr>
+            </thead>
+            <tbody id="approvalTableBody" class="divide-y divide-[var(--oak-line)] text-[var(--oak-ink)]">
+              <!-- Rows rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--oak-line)] px-4 py-3">
+          <span class="text-sm text-[var(--oak-ink-3)]">共 83 条，每页 10 条</span>
+          <div class="flex items-center gap-2">
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] border border-[var(--oak-line)] bg-[var(--oak-surface)] text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] disabled:opacity-40" disabled>
+              <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            </button>
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] bg-[var(--oak-primary)] text-sm font-medium text-[var(--oak-primary-foreground)]">1</button>
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">2</button>
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">3</button>
+            <span class="px-1 text-[var(--oak-ink-3)]">...</span>
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)]">9</button>
+            <button class="inline-flex h-8 w-8 items-center justify-center rounded-[var(--oak-radius-small)] border border-[var(--oak-line)] bg-[var(--oak-surface)] text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+              <i data-lucide="chevron-right" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Approval detail drawer -->
+  <div id="drawerBackdrop" class="fixed inset-0 z-50 hidden bg-black/40 transition-opacity" onclick="closeDrawer()"></div>
+  <aside id="approvalDrawer" class="fixed right-0 top-0 z-50 h-full w-full translate-x-full overflow-y-auto bg-[var(--oak-card)] shadow-[var(--oak-shadow-3)] transition-transform duration-300 sm:w-[480px]">
+    <div class="flex h-full flex-col">
+      <div class="flex items-center justify-between border-b border-[var(--oak-line)] px-6 py-4">
+        <h2 class="text-lg font-semibold text-[var(--oak-ink)]">审批详情</h2>
+        <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" onclick="closeDrawer()">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+      <div id="drawerContent" class="flex-1 px-6 py-5">
+        <!-- Detail content rendered by JS -->
+      </div>
+      <div id="drawerActions" class="border-t border-[var(--oak-line)] px-6 py-4">
+        <!-- Action buttons rendered by JS -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="pointer-events-none fixed bottom-6 right-6 z-[60] flex flex-col gap-2"></div>
+
+  <script>
+    const typeMap = {
+      leave: '请假',
+      reimburse: '报销',
+      purchase: '采购',
+      seal: '用印'
+    };
+
+    const statusMeta = {
+      pending: { label: '待审批', cls: 'bg-[rgba(245,184,0,0.15)] text-[var(--oak-state-warning)]', icon: 'clock' },
+      processing: { label: '审批中', cls: 'bg-[rgba(46,144,250,0.12)] text-[var(--oak-state-info)]', icon: 'loader' },
+      approved: { label: '已通过', cls: 'bg-[rgba(52,168,83,0.12)] text-[var(--oak-state-success)]', icon: 'check-circle' },
+      rejected: { label: '已驳回', cls: 'bg-[rgba(234,67,53,0.12)] text-[var(--oak-state-error)]', icon: 'x-circle' }
+    };
+
+    let approvals = [
+      { id: 1, title: 'Q3 团建费用报销', applicant: '张伟', type: 'reimburse', amount: 3280, submitTime: '2026-08-19 09:30', approver: '李经理', status: 'pending', content: '部门 Q3 团建活动费用报销，包含餐饮、交通及场地费用，附发票 6 张。', timeline: [{ time: '2026-08-19 09:30', actor: '张伟', action: '提交申请' }] },
+      { id: 2, title: '年假申请（3天）', applicant: '王芳', type: 'leave', amount: null, submitTime: '2026-08-18 16:45', approver: '刘主管', status: 'processing', content: '因个人事务申请 8 月 21 日至 8 月 23 日年假，共计 3 个工作日，已做好工作交接。', timeline: [{ time: '2026-08-18 16:45', actor: '王芳', action: '提交申请' }, { time: '2026-08-18 17:02', actor: '刘主管', action: '转交部门总监' }] },
+      { id: 3, title: '办公电脑采购申请', applicant: '李娜', type: 'purchase', amount: 12800, submitTime: '2026-08-18 11:20', approver: '陈总监', status: 'approved', content: '为新入职研发人员采购高性能笔记本 2 台，预算内执行。', timeline: [{ time: '2026-08-18 11:20', actor: '李娜', action: '提交申请' }, { time: '2026-08-18 14:10', actor: '陈总监', action: '审批通过' }] },
+      { id: 4, title: '销售合同用印申请', applicant: '赵强', type: 'seal', amount: null, submitTime: '2026-08-17 15:00', approver: '孙经理', status: 'rejected', content: '客户 A 项目合同用印，合同金额 50 万元，因条款需要补充法务审核意见被驳回。', timeline: [{ time: '2026-08-17 15:00', actor: '赵强', action: '提交申请' }, { time: '2026-08-17 16:30', actor: '孙经理', action: '驳回申请' }] },
+      { id: 5, title: '差旅费用报销', applicant: '陈晨', type: 'reimburse', amount: 2150, submitTime: '2026-08-17 10:10', approver: '李经理', status: 'pending', content: '上海出差往返机票及酒店费用报销，附行程单与发票。', timeline: [{ time: '2026-08-17 10:10', actor: '陈晨', action: '提交申请' }] },
+      { id: 6, title: '病假申请（1天）', applicant: '刘洋', type: 'leave', amount: null, submitTime: '2026-08-16 08:20', approver: '刘主管', status: 'approved', content: '因身体不适申请 8 月 16 日病假一天，已提交医院诊断证明。', timeline: [{ time: '2026-08-16 08:20', actor: '刘洋', action: '提交申请' }, { time: '2026-08-16 09:05', actor: '刘主管', action: '审批通过' }] },
+      { id: 7, title: '服务器扩容采购', applicant: '周杰', type: 'purchase', amount: 56000, submitTime: '2026-08-15 14:00', approver: '陈总监', status: 'processing', content: '为应对业务增长，申请采购云服务器资源一年，需财务复核预算。', timeline: [{ time: '2026-08-15 14:00', actor: '周杰', action: '提交申请' }, { time: '2026-08-16 09:30', actor: '陈总监', action: '转交财务复核' }] },
+      { id: 8, title: '市场推广用印申请', applicant: '吴敏', type: 'seal', amount: null, submitTime: '2026-08-15 09:45', approver: '孙经理', status: 'pending', content: 'Q3 市场推广活动合作协议用印，合作金额 8 万元。', timeline: [{ time: '2026-08-15 09:45', actor: '吴敏', action: '提交申请' }] }
+    ];
+
+    let currentDetailId = null;
+
+    function formatAmount(amount) {
+      return amount == null ? '-' : '¥' + amount.toLocaleString('zh-CN');
+    }
+
+    function renderStatusBadge(status) {
+      const meta = statusMeta[status];
+      return `<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${meta.cls}"><i data-lucide="${meta.icon}" class="h-3 w-3"></i> ${meta.label}</span>`;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('approvalTableBody');
+      const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+      const typeFilter = document.getElementById('typeFilter').value;
+      const statusFilter = document.getElementById('statusFilter').value;
+
+      tbody.innerHTML = '';
+
+      approvals.forEach(item => {
+        const matchKeyword = !keyword || item.title.toLowerCase().includes(keyword) || item.applicant.toLowerCase().includes(keyword);
+        const matchType = !typeFilter || item.type === typeFilter;
+        const matchStatus = !statusFilter || item.status === statusFilter;
+
+        const tr = document.createElement('tr');
+        tr.className = `transition-colors hover:bg-[var(--oak-muted)] ${matchKeyword && matchType && matchStatus ? '' : 'approval-row-hidden'}`;
+        tr.dataset.id = item.id;
+        tr.innerHTML = `
+          <td class="px-4 py-3">
+            <button class="font-medium text-[var(--oak-ink)] hover:text-[var(--oak-primary)]" onclick="openDrawer(${item.id})">${item.title}</button>
+          </td>
+          <td class="px-4 py-3">${item.applicant}</td>
+          <td class="px-4 py-3 text-[var(--oak-ink-2)]">${typeMap[item.type]}</td>
+          <td class="px-4 py-3 font-mono text-[var(--oak-ink-2)]">${formatAmount(item.amount)}</td>
+          <td class="px-4 py-3 text-[var(--oak-ink-2)]">${item.submitTime}</td>
+          <td class="px-4 py-3">${item.approver}</td>
+          <td class="px-4 py-3 status-cell">${renderStatusBadge(item.status)}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center justify-end gap-1">
+              <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" title="查看" onclick="openDrawer(${item.id})">
+                <i data-lucide="eye" class="h-4 w-4"></i>
+              </button>
+              ${item.status === 'pending' || item.status === 'processing' ? `
+              <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-success)]" title="通过" onclick="approveItem(${item.id})">
+                <i data-lucide="check" class="h-4 w-4"></i>
+              </button>
+              <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" title="驳回" onclick="rejectItem(${item.id})">
+                <i data-lucide="x" class="h-4 w-4"></i>
+              </button>
+              ` : ''}
+              <button class="rounded-[var(--oak-radius-small)] p-1.5 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-state-error)]" title="删除" onclick="deleteItem(${item.id})">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      lucide.createIcons();
+    }
+
+    function openDrawer(id) {
+      const item = approvals.find(a => a.id === id);
+      if (!item) return;
+      currentDetailId = id;
+
+      const content = document.getElementById('drawerContent');
+      content.innerHTML = `
+        <div class="mb-6 flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--oak-primary)] text-sm font-semibold text-[var(--oak-primary-foreground)]">${item.applicant.charAt(0)}</span>
+          <div>
+            <div class="text-base font-semibold text-[var(--oak-ink)]">${item.applicant}</div>
+            <div class="text-xs text-[var(--oak-ink-3)]">${item.applicant}@oakoa.com · 提交于 ${item.submitTime}</div>
+          </div>
+        </div>
+        <div class="mb-6 rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-muted)] p-4">
+          <div class="mb-3 grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div class="text-xs text-[var(--oak-ink-3)]">审批类型</div>
+              <div class="font-medium text-[var(--oak-ink)]">${typeMap[item.type]}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--oak-ink-3)]">当前审批人</div>
+              <div class="font-medium text-[var(--oak-ink)]">${item.approver}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--oak-ink-3)]">金额</div>
+              <div class="font-medium text-[var(--oak-ink)]">${formatAmount(item.amount)}</div>
+            </div>
+            <div>
+              <div class="text-xs text-[var(--oak-ink-3)]">状态</div>
+              <div class="mt-0.5">${renderStatusBadge(item.status)}</div>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--oak-ink-3)]">审批内容</div>
+            <div class="mt-1 text-sm leading-relaxed text-[var(--oak-ink-2)]">${item.content}</div>
+          </div>
+        </div>
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-[var(--oak-ink)]">审批记录</h3>
+          <div class="relative pl-3">
+            <div class="absolute left-[7px] top-2 bottom-2 w-px bg-[var(--oak-line)]"></div>
+            <ul class="space-y-4">
+              ${item.timeline.map((t, idx) => `
+                <li class="relative pl-6">
+                  <span class="absolute left-0 top-1 h-3.5 w-3.5 rounded-full border-2 border-[var(--oak-card)] ${idx === item.timeline.length - 1 ? 'bg-[var(--oak-primary)]' : 'bg-[var(--oak-ink-3)]'}"></span>
+                  <div class="text-sm font-medium text-[var(--oak-ink)]">${t.action}</div>
+                  <div class="text-xs text-[var(--oak-ink-3)]">${t.actor} · ${t.time}</div>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+
+      const actions = document.getElementById('drawerActions');
+      if (item.status === 'pending' || item.status === 'processing') {
+        actions.innerHTML = `
+          <div class="flex gap-3">
+            <button class="flex-1 rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" onclick="rejectItem(${item.id}); closeDrawer();">驳回</button>
+            <button class="flex-1 rounded-[var(--oak-radius-medium)] bg-[var(--oak-primary)] px-4 py-2 text-sm font-medium text-[var(--oak-primary-foreground)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)] focus:ring-offset-1" onclick="approveItem(${item.id}); closeDrawer();">通过</button>
+          </div>
+        `;
+      } else {
+        actions.innerHTML = `
+          <button class="w-full rounded-[var(--oak-radius-medium)] border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink)] hover:bg-[var(--oak-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" onclick="closeDrawer()">关闭</button>
+        `;
+      }
+
+      document.getElementById('drawerBackdrop').classList.remove('hidden');
+      const drawer = document.getElementById('approvalDrawer');
+      drawer.classList.remove('translate-x-full');
+      lucide.createIcons();
+    }
+
+    function closeDrawer() {
+      document.getElementById('approvalDrawer').classList.add('translate-x-full');
+      document.getElementById('drawerBackdrop').classList.add('hidden');
+      currentDetailId = null;
+    }
+
+    function approveItem(id) {
+      const item = approvals.find(a => a.id === id);
+      if (!item) return;
+      item.status = 'approved';
+      item.timeline.push({ time: new Date().toLocaleString('zh-CN', { hour12: false }), actor: '管理员', action: '审批通过' });
+      renderTable();
+      showToast(`「${item.title}」已通过`, 'success');
+    }
+
+    function rejectItem(id) {
+      const item = approvals.find(a => a.id === id);
+      if (!item) return;
+      item.status = 'rejected';
+      item.timeline.push({ time: new Date().toLocaleString('zh-CN', { hour12: false }), actor: '管理员', action: '驳回申请' });
+      renderTable();
+      showToast(`「${item.title}」已驳回`, 'error');
+    }
+
+    function deleteItem(id) {
+      const item = approvals.find(a => a.id === id);
+      if (!item) return;
+      approvals = approvals.filter(a => a.id !== id);
+      renderTable();
+      showToast(`已删除「${item.title}」`, 'info');
+      if (currentDetailId === id) closeDrawer();
+    }
+
+    function showToast(message, type) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const iconMap = { success: 'check-circle', error: 'x-circle', info: 'info' };
+      const colorMap = {
+        success: 'bg-[var(--oak-state-success)]',
+        error: 'bg-[var(--oak-state-error)]',
+        info: 'bg-[var(--oak-ink)]'
+      };
+      toast.className = `pointer-events-auto flex items-center gap-2 rounded-[var(--oak-radius-medium)] ${colorMap[type]} px-4 py-2.5 text-sm font-medium text-white shadow-[var(--oak-shadow-2)] transition-all duration-300 translate-y-2 opacity-0`;
+      toast.innerHTML = `<i data-lucide="${iconMap[type]}" class="h-4 w-4"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+    document.getElementById('typeFilter').addEventListener('change', renderTable);
+    document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+    renderTable();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

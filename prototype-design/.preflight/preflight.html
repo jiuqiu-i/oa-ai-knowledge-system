@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preflight</title>
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <main>
+    </main>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

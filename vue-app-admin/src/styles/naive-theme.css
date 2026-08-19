@@ -1,0 +1,112 @@
+/* Naive UI theme overrides for Oak admin (dark sidebar + warm light content) */
+
+:root {
+  --n-color-primary: #E58A2E;
+  --n-color-primary-hover: #d97d24;
+  --n-color-primary-pressed: #c46f1e;
+  --n-color-primary-suppl: rgba(229, 138, 46, 0.12);
+
+  --n-color-success: #34A853;
+  --n-color-warning: #F5B800;
+  --n-color-error: #EA4335;
+  --n-color-info: #2E90FA;
+
+  --n-text-color-base: #2A261F;
+  --n-text-color-1: #2A261F;
+  --n-text-color-2: #6E665B;
+  --n-text-color-3: #9F968A;
+
+  --n-body-color: #FDFBF7;
+  --n-card-color: #FFFFFF;
+  --n-modal-color: #FFFFFF;
+  --n-drawer-color: #FFFFFF;
+  --n-popover-color: #FFFFFF;
+  --n-divider-color: #E8E2D9;
+  --n-border-color: #E8E2D9;
+  --n-input-color: #FFFFFF;
+  --n-input-color-disabled: #F7F4EF;
+  --n-button-color-tertiary-text: #6E665B;
+  --n-menu-item-text-color: #9F968A;
+  --n-menu-item-text-color-hover: #F5F1EA;
+  --n-menu-item-text-color-active: #FFFFFF;
+  --n-menu-item-color-active: rgba(255, 255, 255, 0.12);
+  --n-menu-item-color-hover: rgba(255, 255, 255, 0.08);
+  --n-menu-item-color-active-hover: rgba(255, 255, 255, 0.16);
+  --n-menu-item-icon-color: #9F968A;
+  --n-menu-item-icon-color-hover: #F5F1EA;
+  --n-menu-item-icon-color-active: #FFFFFF;
+  --n-menu-item-icon-color-active-hover: #FFFFFF;
+  --n-menu-item-text-color-child-active: #FFFFFF;
+  --n-menu-item-icon-color-child-active: #FFFFFF;
+}
+
+.n-layout-sider {
+  background: #2A261F !important;
+}
+
+.n-menu.n-menu--dark {
+  --n-item-text-color: #9F968A;
+  --n-item-text-color-hover: #F5F1EA;
+  --n-item-text-color-active: #FFFFFF;
+  --n-item-text-color-active-hover: #FFFFFF;
+  --n-item-text-color-child-active: #FFFFFF;
+  --n-item-icon-color: #9F968A;
+  --n-item-icon-color-hover: #F5F1EA;
+  --n-item-icon-color-active: #FFFFFF;
+  --n-item-icon-color-active-hover: #FFFFFF;
+  --n-item-icon-color-child-active: #FFFFFF;
+  --n-item-color-hover: rgba(255, 255, 255, 0.08);
+  --n-item-color-active: rgba(255, 255, 255, 0.12);
+  --n-item-color-active-hover: rgba(255, 255, 255, 0.16);
+  --n-arrow-color: #9F968A;
+  --n-arrow-color-hover: #F5F1EA;
+  --n-arrow-color-active: #FFFFFF;
+  --n-arrow-color-active-hover: #FFFFFF;
+  --n-group-text-color: #7A7369;
+  background-color: transparent;
+}
+
+.n-statistic .n-statistic__label {
+  color: var(--n-text-color-3);
+  font-size: 13px;
+}
+
+.n-statistic .n-statistic-value__content {
+  color: var(--n-text-color-1);
+  font-weight: 600;
+}
+
+.n-data-table .n-data-table-th {
+  background-color: #F7F4EF;
+  color: #6E665B;
+  font-weight: 500;
+}
+
+.n-data-table .n-data-table-td {
+  color: #2A261F;
+}
+
+.n-card {
+  border-radius: 12px;
+  box-shadow: var(--oak-shadow-1);
+  border: 1px solid #E8E2D9;
+}
+
+.n-card-header__main {
+  color: #2A261F;
+  font-weight: 600;
+}
+
+.n-input,
+.n-select .n-base-selection {
+  border-radius: 8px;
+}
+
+.n-button:not(.n-button--primary-type):not(.n-button--success-type):not(.n-button--warning-type):not(.n-button--error-type):not(.n-button--info-type) {
+  border-color: #E8E2D9;
+}
+
+.n-tag--default-type {
+  background-color: #F7F4EF;
+  color: #6E665B;
+}

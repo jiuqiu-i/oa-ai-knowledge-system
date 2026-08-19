@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的工作台</title>
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased flex flex-col">
+  <!-- SLOT: top-nav -->
+  <header class="sticky top-0 z-40 w-full border-b border-[var(--oak-line)] bg-[var(--oak-surface)]/95 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <a href="#" class="flex items-center gap-2 text-[var(--oak-ink)] font-semibold text-lg" data-dom-id="nav-index">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+          <i data-lucide="layers" class="h-5 w-5"></i>
+        </span>
+        <span>Oak OA</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-index" data-nav-key="index">首页</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-primary)] bg-[var(--oak-muted)]" data-dom-id="nav-user-home" data-nav-key="user-home">工作台</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-kb-explore" data-nav-key="kb-explore">知识库</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-ai-assistant" data-nav-key="ai-assistant">AI 助手</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-dom-id="nav-admin-dashboard" data-nav-key="admin-dashboard">管理端</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="hidden sm:inline-flex items-center justify-center rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]" data-dom-id="nav-login">登录</button>
+        <button class="inline-flex items-center justify-center rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105" data-dom-id="nav-user-home">开始使用</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:py-8">
+    <!-- Welcome banner -->
+    <section class="mb-6 rounded-xl border border-[var(--oak-line)] border-l-4 border-l-[var(--oak-primary)] bg-[var(--oak-surface-2)] p-6">
+      <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="oak-h1">早上好，张宁</h1>
+          <p class="oak-body-large mt-1">今天是 2026 年 8 月 16 日，你目前有 3 项待办事项等待处理。</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button id="btn-start-approval" class="inline-flex items-center justify-center gap-2 rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105">
+            <i data-lucide="file-plus" class="h-4 w-4"></i>
+            发起审批
+          </button>
+          <button id="btn-new-doc" class="inline-flex items-center justify-center gap-2 rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+            <i data-lucide="file-text" class="h-4 w-4"></i>
+            新建文档
+          </button>
+          <button class="inline-flex items-center justify-center gap-2 rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+            <i data-lucide="sparkles" class="h-4 w-4"></i>
+            打开 AI 助手
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard grid -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Left column (2/3) -->
+      <div class="space-y-6 lg:col-span-2">
+        <!-- 待办事项 -->
+        <section class="overflow-hidden rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)]" style="box-shadow: var(--oak-shadow-1);">
+          <div class="flex items-center gap-2 border-b border-[var(--oak-line)] px-5 py-4">
+            <i data-lucide="check-circle-2" class="h-5 w-5 text-[var(--oak-primary)]"></i>
+            <h2 class="oak-h3">待办事项</h2>
+            <span class="ml-auto rounded-full bg-[var(--oak-muted)] px-2.5 py-0.5 text-xs font-medium text-[var(--oak-ink-2)]">3</span>
+          </div>
+          <ul class="divide-y divide-[var(--oak-line)]">
+            <li class="flex items-start gap-3 px-5 py-4 hover:bg-[var(--oak-muted)]">
+              <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--oak-state-error)]"></span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium text-[var(--oak-ink)]">审批：市场部 Q3 预算申请</p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">来自 李经理 · 2 小时前</p>
+              </div>
+              <button class="shrink-0 text-sm font-medium text-[var(--oak-primary)] hover:underline">处理</button>
+            </li>
+            <li class="flex items-start gap-3 px-5 py-4 hover:bg-[var(--oak-muted)]">
+              <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--oak-state-warning)]"></span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium text-[var(--oak-ink)]">确认：下周产品评审会议程</p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">来自 王芳 · 4 小时前</p>
+              </div>
+              <button class="shrink-0 text-sm font-medium text-[var(--oak-primary)] hover:underline">确认</button>
+            </li>
+            <li class="flex items-start gap-3 px-5 py-4 hover:bg-[var(--oak-muted)]">
+              <span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-[var(--oak-state-info)]"></span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-medium text-[var(--oak-ink)]">填写：本月绩效考核自评</p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">人事行政 · 截止时间 8 月 20 日</p>
+              </div>
+              <button class="shrink-0 text-sm font-medium text-[var(--oak-primary)] hover:underline">填写</button>
+            </li>
+          </ul>
+        </section>
+
+        <!-- 我的审批 -->
+        <section class="overflow-hidden rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)]" style="box-shadow: var(--oak-shadow-1);">
+          <div class="flex items-center gap-2 border-b border-[var(--oak-line)] px-5 py-4">
+            <i data-lucide="clipboard-list" class="h-5 w-5 text-[var(--oak-primary)]"></i>
+            <h2 class="oak-h3">我的审批</h2>
+          </div>
+          <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-3">
+            <div class="rounded-lg bg-[var(--oak-surface-2)] p-4">
+              <div class="mb-2 flex items-center gap-2 text-sm text-[var(--oak-ink-2)]">
+                <i data-lucide="clock" class="h-4 w-4"></i>
+                待我审批
+              </div>
+              <div class="text-3xl font-semibold text-[var(--oak-ink)]">5</div>
+              <p class="mt-1 text-xs text-[var(--oak-ink-3)]">较昨日 +1</p>
+            </div>
+            <div class="rounded-lg bg-[var(--oak-surface-2)] p-4">
+              <div class="mb-2 flex items-center gap-2 text-sm text-[var(--oak-ink-2)]">
+                <i data-lucide="loader-2" class="h-4 w-4"></i>
+                审批中
+              </div>
+              <div class="text-3xl font-semibold text-[var(--oak-ink)]">2</div>
+              <p class="mt-1 text-xs text-[var(--oak-ink-3)]">平均 1.5 天</p>
+            </div>
+            <div class="rounded-lg bg-[var(--oak-surface-2)] p-4">
+              <div class="mb-2 flex items-center gap-2 text-sm text-[var(--oak-ink-2)]">
+                <i data-lucide="check" class="h-4 w-4"></i>
+                本月已审批
+              </div>
+              <div class="text-3xl font-semibold text-[var(--oak-ink)]">18</div>
+              <p class="mt-1 text-xs text-[var(--oak-ink-3)]">全部准时</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 最近文档 -->
+        <section class="overflow-hidden rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)]" style="box-shadow: var(--oak-shadow-1);">
+          <div class="flex items-center gap-2 border-b border-[var(--oak-line)] px-5 py-4">
+            <i data-lucide="folder-open" class="h-5 w-5 text-[var(--oak-primary)]"></i>
+            <h2 class="oak-h3">最近文档</h2>
+            <a href="#" class="ml-auto text-sm font-medium text-[var(--oak-primary)] hover:underline">查看全部</a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-[var(--oak-surface-2)] text-[var(--oak-ink-2)]">
+                <tr>
+                  <th class="px-5 py-3 text-left font-medium">文档名称</th>
+                  <th class="px-5 py-3 text-left font-medium">所在空间</th>
+                  <th class="px-5 py-3 text-left font-medium">更新时间</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--oak-line)]">
+                <tr class="hover:bg-[var(--oak-muted)]">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="file-text" class="h-4 w-4 text-[var(--oak-ink-3)]"></i>
+                      <span class="font-medium text-[var(--oak-ink)]">项目周报 2026-W33</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 text-[var(--oak-ink-3)]">产品知识库</td>
+                  <td class="px-5 py-3 text-[var(--oak-ink-3)]">昨天 18:20</td>
+                </tr>
+                <tr class="hover:bg-[var(--oak-muted)]">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="file-spreadsheet" class="h-4 w-4 text-[var(--oak-ink-3)]"></i>
+                      <span class="font-medium text-[var(--oak-ink)]">Q3 销售数据看板</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 text-[var(--oak-ink-3)]">销售部门</td>
+                  <td class="px-5 py-3 text-[var(--oak-ink-3)]">8 月 14 日</td>
+                </tr>
+                <tr class="hover:bg-[var(--oak-muted)]">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="file-code" class="h-4 w-4 text-[var(--oak-ink-3)]"></i>
+                      <span class="font-medium text-[var(--oak-ink)]">API 接口规范 v2.1</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 text-[var(--oak-ink-3)]">技术研发</td>
+                  <td class="px-5 py-3 text-[var(--oak-ink-3)]">8 月 12 日</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right column (1/3) -->
+      <div class="space-y-6">
+        <!-- 知识推荐 -->
+        <section class="overflow-hidden rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)]" style="box-shadow: var(--oak-shadow-1);">
+          <div class="flex items-center gap-2 border-b border-[var(--oak-line)] px-5 py-4">
+            <i data-lucide="lightbulb" class="h-5 w-5 text-[var(--oak-primary)]"></i>
+            <h2 class="oak-h3">知识推荐</h2>
+          </div>
+          <div class="p-5 space-y-3">
+            <a href="#" class="block rounded-lg border border-[var(--oak-line)] p-3 transition-colors hover:border-[var(--oak-primary)]/40 hover:bg-[var(--oak-muted)]">
+              <div class="flex items-center gap-2 text-sm font-medium text-[var(--oak-ink)]">
+                <i data-lucide="book-open" class="h-4 w-4 text-[var(--oak-primary)]"></i>
+                新员工入职指南
+              </div>
+              <p class="mt-1 text-xs text-[var(--oak-ink-3)]">人事行政 · 128 次阅读</p>
+            </a>
+            <a href="#" class="block rounded-lg border border-[var(--oak-line)] p-3 transition-colors hover:border-[var(--oak-primary)]/40 hover:bg-[var(--oak-muted)]">
+              <div class="flex items-center gap-2 text-sm font-medium text-[var(--oak-ink)]">
+                <i data-lucide="book-open" class="h-4 w-4 text-[var(--oak-primary)]"></i>
+                高效会议记录模板
+              </div>
+              <p class="mt-1 text-xs text-[var(--oak-ink-3)]">效率办公 · 86 次阅读</p>
+            </a>
+            <a href="#" class="block rounded-lg border border-[var(--oak-line)] p-3 transition-colors hover:border-[var(--oak-primary)]/40 hover:bg-[var(--oak-muted)]">
+              <div class="flex items-center gap-2 text-sm font-medium text-[var(--oak-ink)]">
+                <i data-lucide="book-open" class="h-4 w-4 text-[var(--oak-primary)]"></i>
+                费用报销流程说明
+              </div>
+              <p class="mt-1 text-xs text-[var(--oak-ink-3)]">财务制度 · 204 次阅读</p>
+            </a>
+          </div>
+        </section>
+
+        <!-- 日程/会议 -->
+        <section class="overflow-hidden rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)]" style="box-shadow: var(--oak-shadow-1);">
+          <div class="flex items-center gap-2 border-b border-[var(--oak-line)] px-5 py-4">
+            <i data-lucide="calendar-days" class="h-5 w-5 text-[var(--oak-primary)]"></i>
+            <h2 class="oak-h3">日程 / 会议</h2>
+          </div>
+          <div class="p-5 space-y-4">
+            <div class="flex gap-4">
+              <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-[var(--oak-primary)]/10 text-[var(--oak-primary)]">
+                <span class="text-xs font-medium">8 月</span>
+                <span class="text-lg font-bold leading-none">16</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-[var(--oak-ink)]">产品周会</p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">14:00 - 15:00 · 线上</p>
+                <div class="mt-2 flex -space-x-2">
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--oak-muted)] text-xs font-medium text-[var(--oak-ink-2)] ring-2 ring-[var(--oak-card)]">张</span>
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--oak-muted)] text-xs font-medium text-[var(--oak-ink-2)] ring-2 ring-[var(--oak-card)]">李</span>
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--oak-muted)] text-xs font-medium text-[var(--oak-ink-2)] ring-2 ring-[var(--oak-card)]">+3</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-4 border-t border-[var(--oak-line)] pt-4">
+              <div class="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-[var(--oak-surface-2)] text-[var(--oak-ink-2)]">
+                <span class="text-xs font-medium">8 月</span>
+                <span class="text-lg font-bold leading-none">17</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-[var(--oak-ink)]">月度复盘会</p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">10:00 - 12:00 · 会议室 A</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 团队动态 -->
+        <section class="overflow-hidden rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)]" style="box-shadow: var(--oak-shadow-1);">
+          <div class="flex items-center gap-2 border-b border-[var(--oak-line)] px-5 py-4">
+            <i data-lucide="activity" class="h-5 w-5 text-[var(--oak-primary)]"></i>
+            <h2 class="oak-h3">团队动态</h2>
+          </div>
+          <ul class="p-5 space-y-5">
+            <li class="flex gap-3">
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--oak-muted)] text-xs font-semibold text-[var(--oak-ink-2)]">王</div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-[var(--oak-ink)]">
+                  <span class="font-medium">王芳</span> 更新了
+                  <a href="#" class="text-[var(--oak-primary)] hover:underline">客户需求文档</a>
+                </p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">30 分钟前</p>
+              </div>
+            </li>
+            <li class="flex gap-3">
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--oak-muted)] text-xs font-semibold text-[var(--oak-ink-2)]">陈</div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-[var(--oak-ink)]">
+                  <span class="font-medium">陈晨</span> 完成了
+                  <span class="font-medium text-[var(--oak-ink)]">合同审批</span>
+                </p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">1 小时前</p>
+              </div>
+            </li>
+            <li class="flex gap-3">
+              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--oak-muted)] text-xs font-semibold text-[var(--oak-ink-2)]">李</div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm text-[var(--oak-ink)]">
+                  <span class="font-medium">李经理</span> 在知识库发布了
+                  <a href="#" class="text-[var(--oak-primary)] hover:underline">Q3 战略目标解读</a>
+                </p>
+                <p class="mt-0.5 text-xs text-[var(--oak-ink-3)]">3 小时前</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- SLOT: footer -->
+  <footer class="w-full border-t border-[var(--oak-line)] bg-[var(--oak-surface)] py-10">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
+      <div class="flex items-center gap-2 font-semibold text-[var(--oak-ink)]">
+        <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+          <i data-lucide="layers" class="h-4 w-4"></i>
+        </span>
+        <span>Oak OA</span>
+      </div>
+      <p class="text-sm text-[var(--oak-ink-3)]">© 2026 Oak OA. AI 驱动的办公与知识管理。</p>
+      <div class="flex items-center gap-4 text-sm text-[var(--oak-ink-2)]">
+        <a href="#" class="hover:text-[var(--oak-primary)]">帮助中心</a>
+        <a href="#" class="hover:text-[var(--oak-primary)]">隐私政策</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 发起审批弹窗 -->
+  <div id="modal-approval" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+    <div class="w-full max-w-[28rem] rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-3)]">
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="oak-h3">发起审批</h3>
+        <button type="button" class="modal-close inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--oak-ink-3)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" aria-label="关闭">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+      <form id="form-approval">
+        <div class="space-y-4">
+          <div>
+            <label for="approval-title" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">审批标题</label>
+            <input id="approval-title" name="title" type="text" required placeholder="请输入审批标题" class="w-full rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20">
+          </div>
+          <div>
+            <label for="approval-type" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">审批类型</label>
+            <select id="approval-type" name="type" class="w-full rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20">
+              <option value="leave">请假</option>
+              <option value="reimburse">报销</option>
+              <option value="purchase">采购</option>
+              <option value="seal">用印</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+          <div>
+            <label for="approval-content" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">审批内容</label>
+            <textarea id="approval-content" name="content" rows="4" placeholder="请输入审批内容" class="w-full resize-none rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20"></textarea>
+          </div>
+          <div id="approval-amount-field" class="hidden">
+            <label for="approval-amount" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">金额（元）</label>
+            <input id="approval-amount" name="amount" type="number" step="0.01" placeholder="请输入金额" class="w-full rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20">
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" class="modal-cancel rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">取消</button>
+          <button type="submit" class="rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105">提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 新建文档弹窗 -->
+  <div id="modal-doc" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+    <div class="w-full max-w-[28rem] rounded-xl border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-3)]">
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="oak-h3">新建文档</h3>
+        <button type="button" class="modal-close inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--oak-ink-3)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" aria-label="关闭">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+      <form id="form-doc">
+        <div class="space-y-4">
+          <div>
+            <label for="doc-title" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">文档标题</label>
+            <input id="doc-title" name="title" type="text" required placeholder="请输入文档标题" class="w-full rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20">
+          </div>
+          <div>
+            <label for="doc-space" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">所属空间</label>
+            <select id="doc-space" name="space" class="w-full rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20">
+              <option value="product">产品知识库</option>
+              <option value="sales">销售部门</option>
+              <option value="tech">技术研发</option>
+              <option value="hr">人事行政</option>
+            </select>
+          </div>
+          <div>
+            <label for="doc-type" class="mb-1 block text-sm font-medium text-[var(--oak-ink)]">文档类型</label>
+            <select id="doc-type" name="docType" class="w-full rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm text-[var(--oak-ink)] outline-none focus:border-[var(--oak-primary)] focus:ring-2 focus:ring-[var(--oak-ring)]/20">
+              <option value="doc">文档</option>
+              <option value="sheet">表格</option>
+              <option value="slide">幻灯片</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" class="modal-cancel rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">取消</button>
+          <button type="submit" class="rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105">创建</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+  <script>
+    (function () {
+      var approvalBtn = document.getElementById('btn-start-approval');
+      var docBtn = document.getElementById('btn-new-doc');
+      var approvalModal = document.getElementById('modal-approval');
+      var docModal = document.getElementById('modal-doc');
+      var approvalForm = document.getElementById('form-approval');
+      var docForm = document.getElementById('form-doc');
+      var approvalType = document.getElementById('approval-type');
+      var amountField = document.getElementById('approval-amount-field');
+
+      function openModal(modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal(modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      }
+
+      function resetForms() {
+        approvalForm.reset();
+        docForm.reset();
+        toggleAmountField();
+      }
+
+      function toggleAmountField() {
+        var show = approvalType.value === 'reimburse' || approvalType.value === 'purchase';
+        amountField.classList.toggle('hidden', !show);
+      }
+
+      function formDataToObject(form) {
+        var data = {};
+        var formData = new FormData(form);
+        formData.forEach(function (value, key) {
+          data[key] = value;
+        });
+        return data;
+      }
+
+      approvalBtn.addEventListener('click', function () {
+        resetForms();
+        openModal(approvalModal);
+      });
+
+      docBtn.addEventListener('click', function () {
+        resetForms();
+        openModal(docModal);
+      });
+
+      document.querySelectorAll('.modal-close, .modal-cancel').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var modal = btn.closest('.modal-overlay');
+          if (modal) closeModal(modal);
+        });
+      });
+
+      approvalModal.addEventListener('click', function (e) {
+        if (e.target === approvalModal) closeModal(approvalModal);
+      });
+
+      docModal.addEventListener('click', function (e) {
+        if (e.target === docModal) closeModal(docModal);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          closeModal(approvalModal);
+          closeModal(docModal);
+        }
+      });
+
+      approvalType.addEventListener('change', toggleAmountField);
+
+      approvalForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var data = formDataToObject(approvalForm);
+        if (!data.title || !data.title.trim()) {
+          alert('请输入审批标题');
+          return;
+        }
+        console.log('审批提交', data);
+        closeModal(approvalModal);
+        approvalForm.reset();
+        toggleAmountField();
+      });
+
+      docForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var data = formDataToObject(docForm);
+        if (!data.title || !data.title.trim()) {
+          alert('请输入文档标题');
+          return;
+        }
+        console.log('文档创建', data);
+        closeModal(docModal);
+        docForm.reset();
+      });
+    })();
+  </script>
+</body>
+</html>

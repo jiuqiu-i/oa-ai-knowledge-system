@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理概览</title>
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+  <!-- SLOT: sidebar -->
+  <aside class="fixed left-0 top-0 z-40 hidden h-full w-60 flex-col border-r border-[var(--oak-line)] bg-[var(--oak-ink)] md:flex">
+    <div class="flex h-16 items-center gap-2 px-5">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+        <i data-lucide="layers" class="h-5 w-5"></i>
+      </span>
+      <span class="text-lg font-semibold text-[var(--oak-surface)]">Oak OA 管理</span>
+    </div>
+    <nav class="flex flex-1 flex-col gap-1 px-3 py-4">
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md bg-[rgba(255,255,255,0.12)] px-3 py-2.5 text-sm font-medium text-[var(--oak-surface)] hover:bg-[rgba(255,255,255,0.16)]" data-dom-id="nav-admin-dashboard" data-menu-key="admin-dashboard">
+        <i data-lucide="layout-dashboard" class="h-4 w-4"></i> 管理概览
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-kb" data-menu-key="admin-kb">
+        <i data-lucide="book-open" class="h-4 w-4"></i> 知识库管理
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]">
+        <i data-lucide="cpu" class="h-4 w-4"></i> AI 接入配置
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-members" data-menu-key="admin-members">
+        <i data-lucide="users" class="h-4 w-4"></i> 成员管理
+      </a>
+      <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-approvals" data-menu-key="admin-approvals">
+        <i data-lucide="clipboard-check" class="h-4 w-4"></i> 审批管理
+      </a>
+    </nav>
+    <div class="border-t border-[rgba(255,255,255,0.1)] p-4">
+      <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-3)] hover:text-[var(--oak-surface)]" data-dom-id="nav-index">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i> 返回用户端
+      </a>
+    </div>
+  </aside>
+
+  <div class="flex min-h-screen flex-col md:ml-60">
+    <!-- SLOT: top-header -->
+    <header class="flex h-16 items-center justify-between border-b border-[var(--oak-line)] bg-[var(--oak-surface)] px-6">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl font-semibold text-[var(--oak-ink)]" data-slot="pageTitle">管理概览</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="relative hidden md:block">
+          <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+          <input type="text" placeholder="搜索" class="h-9 w-64 rounded-md border border-[var(--oak-line)] bg-[var(--oak-muted)] pl-9 pr-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" />
+        </div>
+        <button class="relative rounded-full p-2 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+          <i data-lucide="bell" class="h-5 w-5"></i>
+          <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--oak-state-error)]"></span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span class="h-8 w-8 rounded-full bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)] flex items-center justify-center text-xs font-semibold">管</span>
+          <span class="hidden text-sm font-medium text-[var(--oak-ink)] lg:inline">管理员</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main dashboard content -->
+    <main class="flex-1 bg-[var(--oak-background)] p-6">
+      <!-- Metric cards -->
+      <section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-[var(--oak-ink-3)]">总员工数</p>
+              <p class="mt-1 text-2xl font-semibold text-[var(--oak-ink)]">1,248</p>
+            </div>
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[var(--oak-primary)]/10 text-[var(--oak-primary)]">
+              <i data-lucide="users" class="h-5 w-5"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-center gap-2 text-sm">
+            <span class="inline-flex items-center gap-1 rounded-full bg-[var(--oak-state-success)]/10 px-2 py-0.5 font-medium text-[var(--oak-state-success)]">
+              <i data-lucide="trending-up" class="h-3.5 w-3.5"></i> +12
+            </span>
+            <span class="text-[var(--oak-ink-3)]">较上月</span>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-[var(--oak-ink-3)]">今日活跃</p>
+              <p class="mt-1 text-2xl font-semibold text-[var(--oak-ink)]">892</p>
+            </div>
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[var(--oak-state-info)]/10 text-[var(--oak-state-info)]">
+              <i data-lucide="activity" class="h-5 w-5"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-center gap-2 text-sm">
+            <span class="inline-flex items-center gap-1 rounded-full bg-[var(--oak-state-success)]/10 px-2 py-0.5 font-medium text-[var(--oak-state-success)]">
+              <i data-lucide="trending-up" class="h-3.5 w-3.5"></i> +5.4%
+            </span>
+            <span class="text-[var(--oak-ink-3)]">较昨日</span>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-[var(--oak-ink-3)]">待处理审批</p>
+              <p class="mt-1 text-2xl font-semibold text-[var(--oak-ink)]">34</p>
+            </div>
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[var(--oak-state-warning)]/10 text-[var(--oak-state-warning)]">
+              <i data-lucide="clipboard-list" class="h-5 w-5"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-center gap-2 text-sm">
+            <span class="inline-flex items-center gap-1 rounded-full bg-[var(--oak-state-error)]/10 px-2 py-0.5 font-medium text-[var(--oak-state-error)]">
+              <i data-lucide="alert-circle" class="h-3.5 w-3.5"></i> 8 项加急
+            </span>
+            <span class="text-[var(--oak-ink-3)]">需关注</span>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-[var(--oak-ink-3)]">知识库文档数</p>
+              <p class="mt-1 text-2xl font-semibold text-[var(--oak-ink)]">3,621</p>
+            </div>
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[var(--oak-state-success)]/10 text-[var(--oak-state-success)]">
+              <i data-lucide="book-open" class="h-5 w-5"></i>
+            </span>
+          </div>
+          <div class="mt-4 flex items-center gap-2 text-sm">
+            <span class="inline-flex items-center gap-1 rounded-full bg-[var(--oak-state-success)]/10 px-2 py-0.5 font-medium text-[var(--oak-state-success)]">
+              <i data-lucide="trending-up" class="h-3.5 w-3.5"></i> +128
+            </span>
+            <span class="text-[var(--oak-ink-3)]">本周新增</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts + sidebar -->
+      <section class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <!-- Left: charts -->
+        <div class="flex flex-col gap-6 lg:col-span-2">
+          <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-base font-semibold text-[var(--oak-ink)]">系统活跃度趋势</h2>
+              <select class="h-8 rounded-md border border-[var(--oak-line)] bg-[var(--oak-muted)] px-2 text-sm text-[var(--oak-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]">
+                <option>近 7 天</option>
+                <option>近 30 天</option>
+              </select>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="activityChart"></canvas>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-base font-semibold text-[var(--oak-ink)]">各部门知识贡献</h2>
+              <button class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-[var(--oak-primary)] hover:bg-[var(--oak-primary)]/10">
+                <i data-lucide="download" class="h-4 w-4"></i> 导出
+              </button>
+            </div>
+            <div class="relative h-56 w-full">
+              <canvas id="deptChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: announcements + recent logins -->
+        <div class="flex flex-col gap-6">
+          <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-base font-semibold text-[var(--oak-ink)]">系统公告</h2>
+              <a href="#" class="text-sm font-medium text-[var(--oak-primary)] hover:underline">全部</a>
+            </div>
+            <div class="flex flex-col gap-4">
+              <div class="rounded-md border border-[var(--oak-line)] bg-[var(--oak-muted)] p-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--oak-state-info)]/10 text-[var(--oak-state-info)]">
+                    <i data-lucide="info" class="h-3 w-3"></i>
+                  </span>
+                  <span class="text-xs font-medium text-[var(--oak-ink-3)]">2026-08-15</span>
+                </div>
+                <p class="mt-2 text-sm font-medium text-[var(--oak-ink)]">系统将于本周日凌晨 02:00 进行例行维护</p>
+              </div>
+              <div class="rounded-md border border-[var(--oak-line)] bg-[var(--oak-muted)] p-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--oak-state-success)]/10 text-[var(--oak-state-success)]">
+                    <i data-lucide="check-circle" class="h-3 w-3"></i>
+                  </span>
+                  <span class="text-xs font-medium text-[var(--oak-ink-3)]">2026-08-14</span>
+                </div>
+                <p class="mt-2 text-sm font-medium text-[var(--oak-ink)]">知识库 AI 检索功能已完成升级</p>
+              </div>
+              <div class="rounded-md border border-[var(--oak-line)] bg-[var(--oak-muted)] p-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[var(--oak-state-warning)]/10 text-[var(--oak-state-warning)]">
+                    <i data-lucide="bell" class="h-3 w-3"></i>
+                  </span>
+                  <span class="text-xs font-medium text-[var(--oak-ink-3)]">2026-08-12</span>
+                </div>
+                <p class="mt-2 text-sm font-medium text-[var(--oak-ink)]">请各部门在 8 月 20 日前完成考勤确认</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+            <div class="mb-4 flex items-center justify-between">
+              <h2 class="text-base font-semibold text-[var(--oak-ink)]">最近登录</h2>
+              <a href="#" class="text-sm font-medium text-[var(--oak-primary)] hover:underline">查看</a>
+            </div>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)] text-xs font-semibold">李</span>
+                  <div>
+                    <p class="text-sm font-medium text-[var(--oak-ink)]">李思远</p>
+                    <p class="text-xs text-[var(--oak-ink-3)]">技术部 · 高级工程师</p>
+                  </div>
+                </div>
+                <span class="text-xs text-[var(--oak-ink-3)]">2 分钟前</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--oak-state-info)] text-white text-xs font-semibold">王</span>
+                  <div>
+                    <p class="text-sm font-medium text-[var(--oak-ink)]">王嘉怡</p>
+                    <p class="text-xs text-[var(--oak-ink-3)]">人事部 · HRBP</p>
+                  </div>
+                </div>
+                <span class="text-xs text-[var(--oak-ink-3)]">15 分钟前</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--oak-state-success)] text-white text-xs font-semibold">张</span>
+                  <div>
+                    <p class="text-sm font-medium text-[var(--oak-ink)]">张伟</p>
+                    <p class="text-xs text-[var(--oak-ink-3)]">产品部 · 产品经理</p>
+                  </div>
+                </div>
+                <span class="text-xs text-[var(--oak-ink-3)]">32 分钟前</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--oak-state-warning)] text-white text-xs font-semibold">陈</span>
+                  <div>
+                    <p class="text-sm font-medium text-[var(--oak-ink)]">陈静</p>
+                    <p class="text-xs text-[var(--oak-ink-3)]">财务部 · 财务主管</p>
+                  </div>
+                </div>
+                <span class="text-xs text-[var(--oak-ink-3)]">1 小时前</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pending approvals table -->
+      <section class="rounded-lg border border-[var(--oak-line)] bg-[var(--oak-card)] p-5 shadow-[var(--oak-shadow-1)]">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-base font-semibold text-[var(--oak-ink)]">待处理审批</h2>
+          <a href="#" class="inline-flex items-center gap-1 text-sm font-medium text-[var(--oak-primary)] hover:underline">
+            查看全部 <i data-lucide="chevron-right" class="h-4 w-4"></i>
+          </a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr class="border-b border-[var(--oak-line)] text-[var(--oak-ink-3)]">
+                <th class="py-3 pr-4 font-medium">申请人</th>
+                <th class="py-3 pr-4 font-medium">类型</th>
+                <th class="py-3 pr-4 font-medium">时间</th>
+                <th class="py-3 pr-4 font-medium">状态</th>
+                <th class="py-3 pr-4 font-medium text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody class="text-[var(--oak-ink-2)]">
+              <tr class="border-b border-[var(--oak-line)] last:border-0 hover:bg-[var(--oak-muted)]">
+                <td class="py-3 pr-4 font-medium text-[var(--oak-ink)]">李思远</td>
+                <td class="py-3 pr-4">请假申请</td>
+                <td class="py-3 pr-4">2026-08-16 09:12</td>
+                <td class="py-3 pr-4">
+                  <span class="inline-flex items-center rounded-full bg-[var(--oak-state-warning)]/10 px-2 py-0.5 text-xs font-medium text-[var(--oak-state-warning)]">待审批</span>
+                </td>
+                <td class="py-3 pr-4 text-right">
+                  <button class="rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-success)] hover:bg-[var(--oak-state-success)]/10">通过</button>
+                  <button class="ml-2 rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-error)] hover:bg-[var(--oak-state-error)]/10">驳回</button>
+                </td>
+              </tr>
+              <tr class="border-b border-[var(--oak-line)] last:border-0 hover:bg-[var(--oak-muted)]">
+                <td class="py-3 pr-4 font-medium text-[var(--oak-ink)]">王嘉怡</td>
+                <td class="py-3 pr-4">报销申请</td>
+                <td class="py-3 pr-4">2026-08-16 08:45</td>
+                <td class="py-3 pr-4">
+                  <span class="inline-flex items-center rounded-full bg-[var(--oak-state-warning)]/10 px-2 py-0.5 text-xs font-medium text-[var(--oak-state-warning)]">待审批</span>
+                </td>
+                <td class="py-3 pr-4 text-right">
+                  <button class="rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-success)] hover:bg-[var(--oak-state-success)]/10">通过</button>
+                  <button class="ml-2 rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-error)] hover:bg-[var(--oak-state-error)]/10">驳回</button>
+                </td>
+              </tr>
+              <tr class="border-b border-[var(--oak-line)] last:border-0 hover:bg-[var(--oak-muted)]">
+                <td class="py-3 pr-4 font-medium text-[var(--oak-ink)]">张伟</td>
+                <td class="py-3 pr-4">采购申请</td>
+                <td class="py-3 pr-4">2026-08-15 17:30</td>
+                <td class="py-3 pr-4">
+                  <span class="inline-flex items-center rounded-full bg-[var(--oak-state-info)]/10 px-2 py-0.5 text-xs font-medium text-[var(--oak-state-info)]">待复核</span>
+                </td>
+                <td class="py-3 pr-4 text-right">
+                  <button class="rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-success)] hover:bg-[var(--oak-state-success)]/10">通过</button>
+                  <button class="ml-2 rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-error)] hover:bg-[var(--oak-state-error)]/10">驳回</button>
+                </td>
+              </tr>
+              <tr class="border-b border-[var(--oak-line)] last:border-0 hover:bg-[var(--oak-muted)]">
+                <td class="py-3 pr-4 font-medium text-[var(--oak-ink)]">陈静</td>
+                <td class="py-3 pr-4">用车申请</td>
+                <td class="py-3 pr-4">2026-08-15 16:08</td>
+                <td class="py-3 pr-4">
+                  <span class="inline-flex items-center rounded-full bg-[var(--oak-state-warning)]/10 px-2 py-0.5 text-xs font-medium text-[var(--oak-state-warning)]">待审批</span>
+                </td>
+                <td class="py-3 pr-4 text-right">
+                  <button class="rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-success)] hover:bg-[var(--oak-state-success)]/10">通过</button>
+                  <button class="ml-2 rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-error)] hover:bg-[var(--oak-state-error)]/10">驳回</button>
+                </td>
+              </tr>
+              <tr class="border-b border-[var(--oak-line)] last:border-0 hover:bg-[var(--oak-muted)]">
+                <td class="py-3 pr-4 font-medium text-[var(--oak-ink)]">刘洋</td>
+                <td class="py-3 pr-4">加班申请</td>
+                <td class="py-3 pr-4">2026-08-15 14:22</td>
+                <td class="py-3 pr-4">
+                  <span class="inline-flex items-center rounded-full bg-[var(--oak-state-info)]/10 px-2 py-0.5 text-xs font-medium text-[var(--oak-state-info)]">待复核</span>
+                </td>
+                <td class="py-3 pr-4 text-right">
+                  <button class="rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-success)] hover:bg-[var(--oak-state-success)]/10">通过</button>
+                  <button class="ml-2 rounded-md px-2 py-1 text-xs font-medium text-[var(--oak-state-error)] hover:bg-[var(--oak-state-error)]/10">驳回</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const oakPrimary = '#E58A2E';
+    const oakInk2 = '#6E665B';
+    const oakLine = '#E8E2D9';
+    const oakSuccess = '#34A853';
+    const oakInfo = '#2E90FA';
+    const oakWarning = '#F5B800';
+
+    Chart.defaults.font.family = 'Inter, "Noto Sans SC", system-ui, sans-serif';
+    Chart.defaults.color = oakInk2;
+
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+      type: 'line',
+      data: {
+        labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+        datasets: [{
+          label: '活跃用户数',
+          data: [720, 810, 795, 860, 892, 650, 680],
+          borderColor: oakPrimary,
+          backgroundColor: 'rgba(229, 138, 46, 0.12)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: oakPrimary,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: oakInk2 }
+          },
+          y: {
+            border: { display: false },
+            grid: { color: oakLine },
+            ticks: { color: oakInk2 }
+          }
+        }
+      }
+    });
+
+    const deptCtx = document.getElementById('deptChart').getContext('2d');
+    new Chart(deptCtx, {
+      type: 'bar',
+      data: {
+        labels: ['技术部', '产品部', '人事部', '财务部', '市场部', '运营部'],
+        datasets: [{
+          label: '文档贡献数',
+          data: [420, 310, 180, 150, 260, 210],
+          backgroundColor: [oakPrimary, oakInfo, oakSuccess, oakWarning, '#9F968A', '#2A261F'],
+          borderRadius: 6,
+          barThickness: 24
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: oakInk2 }
+          },
+          y: {
+            border: { display: false },
+            grid: { color: oakLine },
+            ticks: { color: oakInk2 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

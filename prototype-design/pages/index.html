@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页</title>
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+<!-- SLOT: top-nav -->
+<header class="sticky top-0 z-40 w-full border-b border-[var(--oak-line)] bg-[var(--oak-surface)]/95 backdrop-blur">
+  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+    <a href="#" class="flex items-center gap-2 text-[var(--oak-ink)] font-semibold text-lg" data-dom-id="nav-index">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+        <i data-lucide="layers" class="h-5 w-5"></i>
+      </span>
+      <span>Oak OA</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-1">
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-primary)] bg-[var(--oak-muted)]" data-dom-id="nav-index" data-nav-key="index">首页</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-user-home" data-nav-key="user-home">工作台</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-kb-explore" data-nav-key="kb-explore">知识库</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-ai-assistant" data-nav-key="ai-assistant">AI 助手</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-dom-id="nav-admin-dashboard" data-nav-key="admin-dashboard">管理端</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <button class="hidden sm:inline-flex items-center justify-center rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]" data-dom-id="nav-login">登录</button>
+      <button class="inline-flex items-center justify-center rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105" data-dom-id="nav-user-home">开始使用</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="relative w-full h-[520px] md:h-[620px] overflow-hidden">
+    <img src="../assets/hero-main.jpg" alt="现代团队协作办公场景" class="absolute inset-0 h-full w-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-br from-[var(--oak-primary)]/80 via-[var(--oak-foreground)]/55 to-[var(--oak-primary)]/35"></div>
+    <div class="relative z-10 mx-auto flex h-full max-w-5xl flex-col items-center justify-center px-6 text-center">
+      <h1 class="oak-h1 text-white drop-shadow-sm">让 AI 与知识库驱动高效办公</h1>
+      <p class="mt-5 max-w-2xl text-lg md:text-xl leading-relaxed text-white/90">
+        一体化 OA 平台，融合智能助手与企业知识库，让流程审批、协作沟通、数据洞察触手可及。
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="#" class="inline-flex items-center rounded-lg bg-[var(--oak-primary)] px-7 py-3 text-base font-semibold text-[var(--oak-primary-foreground)] shadow-lg shadow-[var(--oak-primary)]/30 hover:brightness-105">免费试用</a>
+        <a href="#" class="inline-flex items-center rounded-lg border border-white/40 bg-white/10 px-7 py-3 text-base font-medium text-white backdrop-blur-sm hover:bg-white/20">了解更多</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 md:py-24 bg-[var(--oak-background)]">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="mb-12 text-center">
+        <h2 class="oak-h2">核心能力</h2>
+        <p class="mt-3 oak-body-large">为现代办公场景打造的全栈解决方案</p>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <article class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-1)] transition hover:-translate-y-1 hover:shadow-[var(--oak-shadow-2)]">
+          <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--oak-muted)] text-[var(--oak-primary)]">
+            <i data-lucide="bot" class="h-6 w-6"></i>
+          </div>
+          <h3 class="oak-h3">AI 智能助手</h3>
+          <p class="mt-2 oak-body">自然语言问答、智能续写、任务提醒，让每位员工都拥有一位 7×24 的办公助理。</p>
+        </article>
+        <article class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-1)] transition hover:-translate-y-1 hover:shadow-[var(--oak-shadow-2)]">
+          <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--oak-muted)] text-[var(--oak-primary)]">
+            <i data-lucide="book-open" class="h-6 w-6"></i>
+          </div>
+          <h3 class="oak-h3">企业知识库</h3>
+          <p class="mt-2 oak-body">集中沉淀制度、文档与经验，支持全文检索与权限管理，构建组织专属知识体系。</p>
+        </article>
+        <article class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-1)] transition hover:-translate-y-1 hover:shadow-[var(--oak-shadow-2)]">
+          <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--oak-muted)] text-[var(--oak-primary)]">
+            <i data-lucide="list-checks" class="h-6 w-6"></i>
+          </div>
+          <h3 class="oak-h3">流程审批</h3>
+          <p class="mt-2 oak-body">可视化流程设计、灵活表单与多级审批，随时随地发起、审批与追踪业务流。</p>
+        </article>
+        <article class="rounded-[var(--oak-radius-large)] border border-[var(--oak-line)] bg-[var(--oak-card)] p-6 shadow-[var(--oak-shadow-1)] transition hover:-translate-y-1 hover:shadow-[var(--oak-shadow-2)]">
+          <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[var(--oak-muted)] text-[var(--oak-primary)]">
+            <i data-lucide="bar-chart-3" class="h-6 w-6"></i>
+          </div>
+          <h3 class="oak-h3">数据洞察</h3>
+          <p class="mt-2 oak-body">实时汇总人、事、流程数据，通过智能看板辅助管理层快速洞察业务趋势。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="py-14 md:py-20 bg-[var(--oak-muted)]">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="grid grid-cols-2 gap-8 md:grid-cols-4 text-center">
+        <div>
+          <div class="text-3xl md:text-4xl font-bold tracking-tight text-[var(--oak-primary)]">10k+</div>
+          <p class="mt-1 oak-body">企业员工</p>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold tracking-tight text-[var(--oak-primary)]">500+</div>
+          <p class="mt-1 oak-body">落地企业</p>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold tracking-tight text-[var(--oak-primary)]">30%</div>
+          <p class="mt-1 oak-body">审批效率提升</p>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold tracking-tight text-[var(--oak-primary)]">99.9%</div>
+          <p class="mt-1 oak-body">平台可用性</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 md:py-24 bg-[var(--oak-background)]">
+    <div class="mx-auto max-w-4xl px-6 text-center">
+      <h2 class="oak-h2">准备好升级办公体验？</h2>
+      <p class="mt-4 oak-body-large">立即加入 Oak OA，让 AI 成为团队的超级助手，开启高效协作新篇章。</p>
+      <a href="#" class="mt-8 inline-flex items-center rounded-lg bg-[var(--oak-primary)] px-8 py-3 text-base font-semibold text-[var(--oak-primary-foreground)] shadow-lg shadow-[var(--oak-primary)]/25 hover:brightness-105">立即开始</a>
+    </div>
+  </section>
+</main>
+
+<!-- SLOT: footer -->
+<footer class="w-full border-t border-[var(--oak-line)] bg-[var(--oak-surface)] py-10">
+  <div class="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2 text-[var(--oak-ink)] font-semibold">
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+        <i data-lucide="layers" class="h-4 w-4"></i>
+      </span>
+      <span>Oak OA</span>
+    </div>
+    <p class="text-sm text-[var(--oak-ink-3)]">© 2026 Oak OA. AI 驱动的办公与知识管理。</p>
+    <div class="flex items-center gap-4 text-sm text-[var(--oak-ink-2)]">
+      <a href="#" class="hover:text-[var(--oak-primary)]">帮助中心</a>
+      <a href="#" class="hover:text-[var(--oak-primary)]">隐私政策</a>
+    </div>
+  </div>
+</footer>
+<script>lucide.createIcons();</script>
+</body>
+</html>

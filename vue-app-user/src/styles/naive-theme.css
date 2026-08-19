@@ -1,0 +1,50 @@
+/* Naive UI CSS-level theme tokens for Oak */
+.n-config-provider,
+.n-button,
+.n-input,
+.n-menu,
+.n-card,
+.n-modal,
+.n-form {
+  font-family: var(--oak-font-sans);
+}
+
+.n-button--primary-type {
+  --n-color: var(--oak-primary) !important;
+  --n-color-hover: var(--oak-primary) !important;
+  --n-color-pressed: #D07A25 !important;
+  --n-text-color: var(--oak-primary-foreground) !important;
+  --n-text-color-hover: var(--oak-primary-foreground) !important;
+  --n-text-color-pressed: var(--oak-primary-foreground) !important;
+}
+
+.n-menu .n-menu-item-content--selected {
+  color: var(--oak-primary) !important;
+  background: var(--oak-muted) !important;
+}
+
+.n-menu .n-menu-item-content--selected .n-menu-item-content__icon {
+  color: var(--oak-primary) !important;
+}
+
+.n-input .n-input__input-el:focus,
+.n-input .n-input__textarea-el:focus {
+  border-color: var(--oak-primary);
+}
+
+.n-base-selection--active .n-base-selection-label {
+  border-color: var(--oak-primary) !important;
+}
+
+.n-tabs .n-tabs-bar {
+  background-color: var(--oak-primary) !important;
+}
+
+.n-tabs .n-tabs-tab--active {
+  color: var(--oak-primary) !important;
+}
+
+.n-radio-button--checked,
+.n-checkbox--checked .n-checkbox__label {
+  color: var(--oak-primary);
+}

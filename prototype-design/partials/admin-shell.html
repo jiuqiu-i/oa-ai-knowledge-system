@@ -1,0 +1,52 @@
+<!-- SLOT: sidebar -->
+<aside class="fixed left-0 top-0 z-40 hidden h-full w-60 flex-col border-r border-[var(--oak-line)] bg-[var(--oak-ink)] md:flex">
+  <div class="flex h-16 items-center gap-2 px-5">
+    <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+      <i data-lucide="layers" class="h-5 w-5"></i>
+    </span>
+    <span class="text-lg font-semibold text-[var(--oak-surface)]">Oak OA 管理</span>
+  </div>
+  <nav class="flex flex-1 flex-col gap-1 px-3 py-4">
+    <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-dashboard" data-menu-key="admin-dashboard">
+      <i data-lucide="layout-dashboard" class="h-4 w-4"></i> 管理概览
+    </a>
+    <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-kb" data-menu-key="admin-kb">
+      <i data-lucide="book-open" class="h-4 w-4"></i> 知识库管理
+    </a>
+    <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]">
+      <i data-lucide="cpu" class="h-4 w-4"></i> AI 接入配置
+    </a>
+    <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-members" data-menu-key="admin-members">
+      <i data-lucide="users" class="h-4 w-4"></i> 成员管理
+    </a>
+    <a href="#" class="admin-menu-item flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-[var(--oak-ink-3)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--oak-surface)]" data-dom-id="nav-admin-approvals" data-menu-key="admin-approvals">
+      <i data-lucide="clipboard-check" class="h-4 w-4"></i> 审批管理
+    </a>
+  </nav>
+  <div class="border-t border-[rgba(255,255,255,0.1)] p-4">
+    <a href="#" class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-3)] hover:text-[var(--oak-surface)]" data-dom-id="nav-index">
+      <i data-lucide="arrow-left" class="h-4 w-4"></i> 返回用户端
+    </a>
+  </div>
+</aside>
+<!-- SLOT: top-header -->
+<header class="flex h-16 items-center justify-between border-b border-[var(--oak-line)] bg-[var(--oak-surface)] px-6">
+  <!-- SLOT: pageTitle -->
+  <div class="flex items-center gap-3">
+    <h1 class="text-xl font-semibold text-[var(--oak-ink)]" data-slot="pageTitle">管理概览</h1>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="relative hidden md:block">
+      <i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--oak-ink-3)]"></i>
+      <input type="text" placeholder="搜索" class="h-9 w-64 rounded-md border border-[var(--oak-line)] bg-[var(--oak-muted)] pl-9 pr-3 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none focus:ring-2 focus:ring-[var(--oak-ring)]" />
+    </div>
+    <button class="relative rounded-full p-2 text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]">
+      <i data-lucide="bell" class="h-5 w-5"></i>
+      <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--oak-state-error)]"></span>
+    </button>
+    <div class="flex items-center gap-2">
+      <span class="h-8 w-8 rounded-full bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)] flex items-center justify-center text-xs font-semibold">管</span>
+      <span class="hidden text-sm font-medium text-[var(--oak-ink)] lg:inline">管理员</span>
+    </div>
+  </div>
+</header>

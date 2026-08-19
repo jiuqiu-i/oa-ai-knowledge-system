@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 助手</title>
+    <style id="theme-vars">
+:root {
+  --oak-background: #FDFBF7;
+  --oak-foreground: #2A261F;
+  --oak-card: #FFFFFF;
+  --oak-card-foreground: #2A261F;
+  --oak-popover: #FFFFFF;
+  --oak-popover-foreground: #2A261F;
+  --oak-primary: #E58A2E;
+  --oak-primary-foreground: #FFFFFF;
+  --oak-muted: #F7F4EF;
+  --oak-muted-foreground: #6E665B;
+  --oak-border: #E8E2D9;
+  --oak-input: #E8E2D9;
+  --oak-ring: #E58A2E;
+
+  --oak-radius-small: 4px;
+  --oak-radius-medium: 8px;
+  --oak-radius-large: 12px;
+
+  --oak-surface: #FFFFFF;
+  --oak-surface-2: #F7F4EF;
+  --oak-ink: #2A261F;
+  --oak-ink-2: #6E665B;
+  --oak-ink-3: #9F968A;
+  --oak-line: #E8E2D9;
+
+  --oak-state-success: #34A853;
+  --oak-state-warning: #F5B800;
+  --oak-state-error: #EA4335;
+  --oak-state-info: #2E90FA;
+
+  --oak-shadow-1: 0 1px 2px rgba(42, 38, 31, .05), 0 1px 1px rgba(42, 38, 31, .03);
+  --oak-shadow-2: 0 8px 24px -8px rgba(42, 38, 31, .14);
+  --oak-shadow-3: 0 24px 60px -20px rgba(42, 38, 31, .22);
+
+  --oak-font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --oak-font-mono: ui-monospace, SFMono-Regular, "SF Mono", "Fira Code", "Noto Sans Mono", monospace;
+}
+
+.dark {
+  --oak-background: #161410;
+  --oak-foreground: #F5F1EA;
+  --oak-card: #1E1A14;
+  --oak-card-foreground: #F5F1EA;
+  --oak-popover: #1E1A14;
+  --oak-popover-foreground: #F5F1EA;
+  --oak-primary: #F2A24D;
+  --oak-primary-foreground: #2A261F;
+  --oak-muted: #2A261F;
+  --oak-muted-foreground: #A7A096;
+  --oak-border: #3A342C;
+  --oak-input: #3A342C;
+  --oak-ring: #F2A24D;
+
+  --oak-surface: #1E1A14;
+  --oak-surface-2: #2A261F;
+  --oak-ink: #F5F1EA;
+  --oak-ink-2: #A7A096;
+  --oak-ink-3: #7A7369;
+  --oak-line: #3A342C;
+
+  --oak-shadow-1: 0 1px 2px rgba(0, 0, 0, .12), 0 1px 1px rgba(0, 0, 0, .08);
+  --oak-shadow-2: 0 8px 24px -8px rgba(0, 0, 0, .35);
+  --oak-shadow-3: 0 24px 60px -20px rgba(0, 0, 0, .50);
+}
+
+.oak-h1 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.18;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--oak-ink);
+}
+
+.oak-h2 {
+  font-family: var(--oak-font-sans);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--oak-ink);
+}
+
+.oak-h3 {
+  font-family: var(--oak-font-sans);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--oak-ink);
+}
+
+.oak-body {
+  font-family: var(--oak-font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--oak-ink-2);
+}
+
+.oak-body-large {
+  font-family: var(--oak-font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oak-ink-2);
+}
+
+.oak-caption {
+  font-family: var(--oak-font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oak-ink-3);
+}
+
+.oak-mono {
+  font-family: var(--oak-font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@1.8.0/dist/umd/lucide.min.js"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--oak-background);
+    --color-foreground: var(--oak-foreground);
+    --color-card: var(--oak-card);
+    --color-card-foreground: var(--oak-card-foreground);
+    --color-popover: var(--oak-popover);
+    --color-popover-foreground: var(--oak-popover-foreground);
+    --color-primary: var(--oak-primary);
+    --color-primary-foreground: var(--oak-primary-foreground);
+    --color-muted: var(--oak-muted);
+    --color-muted-foreground: var(--oak-muted-foreground);
+    --color-border: var(--oak-border);
+    --color-input: var(--oak-input);
+    --color-ring: var(--oak-ring);
+    --radius-sm: var(--oak-radius-small);
+    --radius-md: var(--oak-radius-medium);
+    --radius-lg: var(--oak-radius-large);
+  }
+  @layer base {
+    body { background: var(--oak-background); color: var(--oak-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--oak-background); }
+      .text-background { color: var(--oak-background); }
+      .border-background { border-color: var(--oak-background); }
+      .ring-background { --tw-ring-color: var(--oak-background); }
+      .bg-foreground { background-color: var(--oak-foreground); }
+      .text-foreground { color: var(--oak-foreground); }
+      .border-foreground { border-color: var(--oak-foreground); }
+      .ring-foreground { --tw-ring-color: var(--oak-foreground); }
+      .bg-card { background-color: var(--oak-card); }
+      .text-card { color: var(--oak-card); }
+      .border-card { border-color: var(--oak-card); }
+      .ring-card { --tw-ring-color: var(--oak-card); }
+      .bg-card-foreground { background-color: var(--oak-card-foreground); }
+      .text-card-foreground { color: var(--oak-card-foreground); }
+      .border-card-foreground { border-color: var(--oak-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--oak-card-foreground); }
+      .bg-popover { background-color: var(--oak-popover); }
+      .text-popover { color: var(--oak-popover); }
+      .border-popover { border-color: var(--oak-popover); }
+      .ring-popover { --tw-ring-color: var(--oak-popover); }
+      .bg-popover-foreground { background-color: var(--oak-popover-foreground); }
+      .text-popover-foreground { color: var(--oak-popover-foreground); }
+      .border-popover-foreground { border-color: var(--oak-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--oak-popover-foreground); }
+      .bg-primary { background-color: var(--oak-primary); }
+      .text-primary { color: var(--oak-primary); }
+      .border-primary { border-color: var(--oak-primary); }
+      .ring-primary { --tw-ring-color: var(--oak-primary); }
+      .bg-primary-foreground { background-color: var(--oak-primary-foreground); }
+      .text-primary-foreground { color: var(--oak-primary-foreground); }
+      .border-primary-foreground { border-color: var(--oak-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--oak-primary-foreground); }
+      .bg-muted { background-color: var(--oak-muted); }
+      .text-muted { color: var(--oak-muted); }
+      .border-muted { border-color: var(--oak-muted); }
+      .ring-muted { --tw-ring-color: var(--oak-muted); }
+      .bg-muted-foreground { background-color: var(--oak-muted-foreground); }
+      .text-muted-foreground { color: var(--oak-muted-foreground); }
+      .border-muted-foreground { border-color: var(--oak-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--oak-muted-foreground); }
+      .bg-border { background-color: var(--oak-border); }
+      .text-border { color: var(--oak-border); }
+      .border-border { border-color: var(--oak-border); }
+      .ring-border { --tw-ring-color: var(--oak-border); }
+      .bg-input { background-color: var(--oak-input); }
+      .text-input { color: var(--oak-input); }
+      .border-input { border-color: var(--oak-input); }
+      .ring-input { --tw-ring-color: var(--oak-input); }
+      .bg-ring { background-color: var(--oak-ring); }
+      .text-ring { color: var(--oak-ring); }
+      .border-ring { border-color: var(--oak-ring); }
+      .ring-ring { --tw-ring-color: var(--oak-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+
+      /* 打字机光标 */
+      .typing-cursor::after {
+        content: '|';
+        display: inline-block;
+        margin-left: 2px;
+        color: var(--oak-primary);
+        animation: typing-cursor-blink 1s step-end infinite;
+      }
+
+      @keyframes typing-cursor-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+
+      /* 正在输入指示器 */
+      .typing-dots {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 20px;
+      }
+      .typing-dots span {
+        width: 6px;
+        height: 6px;
+        background-color: var(--oak-ink-3);
+        border-radius: 50%;
+        animation: typing-dot-bounce 1.4s ease-in-out infinite both;
+      }
+      .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+      .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+      .typing-dots span:nth-child(3) { animation-delay: 0s; }
+
+      @keyframes typing-dot-bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+      }
+    </style>
+</head>
+<body class="min-h-screen antialiased" style="font-family: var(--oak-font-sans);">
+  <!-- SLOT: top-nav -->
+  <header class="sticky top-0 z-40 w-full border-b border-[var(--oak-line)] bg-[var(--oak-surface)]/95 backdrop-blur">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+      <a href="#" class="flex items-center gap-2 text-[var(--oak-ink)] font-semibold text-lg" data-dom-id="nav-index">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+          <i data-lucide="layers" class="h-5 w-5"></i>
+        </span>
+        <span>Oak OA</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-index" data-nav-key="index">首页</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-user-home" data-nav-key="user-home">工作台</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]" data-dom-id="nav-kb-explore" data-nav-key="kb-explore">知识库</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-primary)] bg-[var(--oak-muted)]" data-dom-id="nav-ai-assistant" data-nav-key="ai-assistant">AI 助手</a>
+      <a href="#" class="nav-link rounded-md px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-primary)]" data-dom-id="nav-admin-dashboard" data-nav-key="admin-dashboard">管理端</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="hidden sm:inline-flex items-center justify-center rounded-md border border-[var(--oak-line)] bg-[var(--oak-surface)] px-3 py-2 text-sm font-medium text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)]" data-dom-id="nav-login">登录</button>
+        <button class="inline-flex items-center justify-center rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105" data-dom-id="nav-user-home">开始使用</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex min-h-[calc(100vh-4rem)]">
+    <!-- 左侧会话侧边栏 -->
+    <aside class="hidden lg:flex w-[280px] flex-col border-r border-[var(--oak-line)] bg-[var(--oak-surface-2)]">
+      <div class="p-4">
+        <button class="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[var(--oak-primary)] px-4 py-2 text-sm font-semibold text-[var(--oak-primary-foreground)] hover:brightness-105 transition">
+          <i data-lucide="plus" class="h-4 w-4"></i>
+          新建对话
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-3 pb-4">
+        <p class="px-3 py-2 text-xs font-medium text-[var(--oak-ink-3)]">今天</p>
+        <button class="mb-1 w-full rounded-md bg-[var(--oak-surface)] px-3 py-2 text-left text-sm font-medium text-[var(--oak-ink)] shadow-sm ring-1 ring-[var(--oak-line)]">
+          周报撰写与要点梳理
+        </button>
+        <button class="mb-1 w-full rounded-md px-3 py-2 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          报销流程咨询
+        </button>
+        <button class="mb-1 w-full rounded-md px-3 py-2 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          会议纪要总结
+        </button>
+
+        <p class="mt-4 px-3 py-2 text-xs font-medium text-[var(--oak-ink-3)]">昨天</p>
+        <button class="mb-1 w-full rounded-md px-3 py-2 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          请假申请模板
+        </button>
+        <button class="mb-1 w-full rounded-md px-3 py-2 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          项目进度跟进
+        </button>
+
+        <p class="mt-4 px-3 py-2 text-xs font-medium text-[var(--oak-ink-3)]">更早</p>
+        <button class="mb-1 w-full rounded-md px-3 py-2 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          入职办理指引
+        </button>
+        <button class="mb-1 w-full rounded-md px-3 py-2 text-left text-sm text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          IT 设备报修
+        </button>
+      </div>
+    </aside>
+
+    <!-- 主对话区 -->
+    <section class="flex min-w-0 flex-1 flex-col bg-background">
+      <!-- 对话头部 -->
+      <div class="flex h-14 shrink-0 items-center justify-between border-b border-[var(--oak-line)] px-4 sm:px-6">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <i data-lucide="bot" class="h-4 w-4"></i>
+          </span>
+          <div>
+            <h1 class="text-base font-semibold text-[var(--oak-ink)]">Oak AI 助手</h1>
+            <div class="flex items-center gap-1.5 text-xs text-[var(--oak-ink-3)]">
+              <span class="h-1.5 w-1.5 rounded-full bg-[var(--oak-state-success)]"></span>
+              <span>在线</span>
+            </div>
+          </div>
+        </div>
+        <button class="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--oak-ink-2)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+          <i data-lucide="settings" class="h-4 w-4"></i>
+        </button>
+      </div>
+
+      <!-- 消息滚动区 -->
+      <div id="chat-scroll-area" class="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+        <div id="message-container" class="mx-auto max-w-3xl space-y-6">
+          <!-- 欢迎与快捷提示 -->
+          <div class="space-y-4 text-center">
+            <div class="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <i data-lucide="sparkles" class="h-6 w-6"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-[var(--oak-ink)]">你好，我是 Oak AI 助手</h2>
+            <p class="text-[var(--oak-ink-2)]">有什么可以帮你的？</p>
+            <div class="flex flex-wrap justify-center gap-2">
+              <button data-quick-prompt="帮我写一份周报" class="inline-flex items-center gap-2 rounded-full border border-[var(--oak-line)] bg-card px-4 py-2 text-sm text-[var(--oak-ink-2)] transition hover:border-primary hover:text-primary">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                帮我写一份周报
+              </button>
+              <button data-quick-prompt="查询公司报销流程" class="inline-flex items-center gap-2 rounded-full border border-[var(--oak-line)] bg-card px-4 py-2 text-sm text-[var(--oak-ink-2)] transition hover:border-primary hover:text-primary">
+                <i data-lucide="search" class="h-4 w-4"></i>
+                查询公司报销流程
+              </button>
+              <button data-quick-prompt="总结这份文档" class="inline-flex items-center gap-2 rounded-full border border-[var(--oak-line)] bg-card px-4 py-2 text-sm text-[var(--oak-ink-2)] transition hover:border-primary hover:text-primary">
+                <i data-lucide="file-check" class="h-4 w-4"></i>
+                总结这份文档
+              </button>
+            </div>
+          </div>
+
+          <!-- 对话气泡 -->
+          <div class="space-y-5">
+            <!-- 用户消息 -->
+            <div class="flex items-end justify-end gap-3">
+              <div class="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary px-5 py-3 text-primary-foreground shadow-sm sm:max-w-[75%]">
+                <p class="text-sm leading-relaxed">帮我写一份周报，重点体现本周项目进展和下周计划。</p>
+              </div>
+            </div>
+
+            <!-- AI 消息 -->
+            <div class="flex items-start gap-3">
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <i data-lucide="bot" class="h-4 w-4"></i>
+              </span>
+              <div class="max-w-[85%] rounded-2xl rounded-tl-sm border border-[var(--oak-line)] bg-card px-5 py-3 text-[var(--oak-ink)] shadow-sm sm:max-w-[75%]">
+                <p class="text-sm leading-relaxed" data-typing="true">好的，请补充以下信息，我会帮你生成周报：</p>
+                <ul class="mt-2 list-inside list-disc space-y-1 text-sm leading-relaxed text-[var(--oak-ink-2)]">
+                  <li>本周完成的核心任务</li>
+                  <li>遇到的主要问题或风险</li>
+                  <li>下周计划与需要的支持</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- 用户消息 -->
+            <div class="flex items-end justify-end gap-3">
+              <div class="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary px-5 py-3 text-primary-foreground shadow-sm sm:max-w-[75%]">
+                <p class="text-sm leading-relaxed">本周完成了知识库原型设计，下周准备进入开发。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部输入区 -->
+      <div class="sticky bottom-0 z-20 border-t border-[var(--oak-line)] bg-[var(--oak-surface)] px-4 py-3 sm:px-8">
+        <div class="mx-auto max-w-3xl">
+          <div class="flex items-end gap-2 rounded-2xl border border-[var(--oak-line)] bg-card px-4 py-3 shadow-sm">
+            <button class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--oak-ink-3)] hover:bg-[var(--oak-muted)] hover:text-[var(--oak-ink)]">
+              <i data-lucide="paperclip" class="h-5 w-5"></i>
+            </button>
+            <textarea id="chat-input" rows="1" placeholder="输入消息..." class="max-h-32 w-full resize-none bg-transparent py-1 text-sm text-[var(--oak-ink)] placeholder:text-[var(--oak-ink-3)] focus:outline-none"></textarea>
+            <button id="chat-send" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:brightness-105">
+              <i data-lucide="arrow-up" class="h-4 w-4"></i>
+            </button>
+          </div>
+          <p class="mt-2 text-center text-xs text-[var(--oak-ink-3)]">AI 生成内容仅供参考，请核实重要信息。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SLOT: footer -->
+  <footer class="w-full border-t border-[var(--oak-line)] bg-[var(--oak-surface)] py-10">
+    <div class="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2 text-[var(--oak-ink)] font-semibold">
+        <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[var(--oak-primary)] text-[var(--oak-primary-foreground)]">
+          <i data-lucide="layers" class="h-4 w-4"></i>
+        </span>
+        <span>Oak OA</span>
+      </div>
+      <p class="text-sm text-[var(--oak-ink-3)]">© 2026 Oak OA. AI 驱动的办公与知识管理。</p>
+      <div class="flex items-center gap-4 text-sm text-[var(--oak-ink-2)]">
+        <a href="#" class="hover:text-[var(--oak-primary)]">帮助中心</a>
+        <a href="#" class="hover:text-[var(--oak-primary)]">隐私政策</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const chatScrollArea = document.getElementById('chat-scroll-area');
+      const messageContainer = document.getElementById('message-container');
+      const chatInput = document.getElementById('chat-input');
+      const chatSend = document.getElementById('chat-send');
+      const quickPrompts = document.querySelectorAll('[data-quick-prompt]');
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function scrollToBottom() {
+        if (chatScrollArea) {
+          chatScrollArea.scrollTo({ top: chatScrollArea.scrollHeight, behavior: 'smooth' });
+        }
+      }
+
+      function refreshIcons() {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+          lucide.createIcons();
+        }
+      }
+
+      window.typeWriter = function (element, text, speed) {
+        speed = speed || 45;
+        element.textContent = '';
+        element.classList.add('typing-cursor');
+        element.setAttribute('data-typing', 'true');
+        let i = 0;
+        function type() {
+          if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            scrollToBottom();
+            setTimeout(type, speed);
+          } else {
+            element.classList.remove('typing-cursor');
+          }
+        }
+        type();
+      };
+
+      function appendUserMessage(text) {
+        const html =
+          '<div class="flex items-end justify-end gap-3">' +
+            '<div class="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary px-5 py-3 text-primary-foreground shadow-sm sm:max-w-[75%]">' +
+              '<p class="text-sm leading-relaxed">' + escapeHtml(text) + '</p>' +
+            '</div>' +
+          '</div>';
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        messageContainer.appendChild(wrapper.firstElementChild);
+        scrollToBottom();
+      }
+
+      function showTypingIndicator() {
+        const html =
+          '<div class="flex items-start gap-3 typing-indicator">' +
+            '<span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">' +
+              '<i data-lucide="bot" class="h-4 w-4"></i>' +
+            '</span>' +
+            '<div class="max-w-[85%] rounded-2xl rounded-tl-sm border border-[var(--oak-line)] bg-card px-5 py-3 text-[var(--oak-ink)] shadow-sm sm:max-w-[75%]">' +
+              '<div class="typing-dots"><span></span><span></span><span></span></div>' +
+            '</div>' +
+          '</div>';
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        const indicator = wrapper.firstElementChild;
+        messageContainer.appendChild(indicator);
+        refreshIcons();
+        scrollToBottom();
+        return indicator;
+      }
+
+      function appendAIMessage(text) {
+        const html =
+          '<div class="flex items-start gap-3">' +
+            '<span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">' +
+              '<i data-lucide="bot" class="h-4 w-4"></i>' +
+            '</span>' +
+            '<div class="max-w-[85%] rounded-2xl rounded-tl-sm border border-[var(--oak-line)] bg-card px-5 py-3 text-[var(--oak-ink)] shadow-sm sm:max-w-[75%]">' +
+              '<p class="text-sm leading-relaxed" data-typing="true"></p>' +
+            '</div>' +
+          '</div>';
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        const messageEl = wrapper.firstElementChild;
+        messageContainer.appendChild(messageEl);
+        refreshIcons();
+        scrollToBottom();
+        const textContainer = messageEl.querySelector('[data-typing="true"]');
+        typeWriter(textContainer, text, 45);
+      }
+
+      function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        appendUserMessage(text);
+        chatInput.value = '';
+        chatInput.focus();
+        const indicator = showTypingIndicator();
+        setTimeout(function () {
+          indicator.remove();
+          appendAIMessage('收到，我会根据你的需求继续协助。');
+        }, 1500);
+      }
+
+      chatSend.addEventListener('click', sendMessage);
+      chatInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      quickPrompts.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const prompt = btn.getAttribute('data-quick-prompt');
+          chatInput.value = prompt;
+          sendMessage();
+        });
+      });
+
+      // 初始示例对话 AI 回复自动播放一次打字机效果
+      const initialTypingElements = document.querySelectorAll('[data-typing="true"]');
+      initialTypingElements.forEach(function (el, index) {
+        const originalText = el.textContent.trim();
+        el.textContent = '';
+        setTimeout(function () {
+          typeWriter(el, originalText, 45);
+        }, index * 600 + 300);
+      });
+    })();
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
