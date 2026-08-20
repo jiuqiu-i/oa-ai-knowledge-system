@@ -264,7 +264,7 @@ async function submitCreate() {
   <div class="approvals-page">
     <!-- Stats cards -->
     <n-grid :cols="4" :x-gap="16" :y-gap="16" responsive="screen" class="stats-grid">
-      <n-grid-item v-for="(stat, index) in stats" :key="index" span="4 s:2 l:1">
+      <n-grid-item v-for="(stat, index) in stats" :key="index" span="1">
         <n-card class="stat-card" :bordered="false">
           <div class="stat-top">
             <span class="stat-label">{{ stat.label }}</span>
@@ -401,7 +401,14 @@ async function submitCreate() {
               </n-grid-item>
               <n-grid-item>
                 <div class="detail-label">状态</div>
-                <div class="detail-value">{{ renderStatus(currentDetail.status) }}</div>
+                <div class="detail-value">
+                  <n-tag :type="statusMeta[currentDetail.status].type as never" size="small" round>
+                    <template #icon>
+                      <component :is="statusMeta[currentDetail.status].icon" :size="12" />
+                    </template>
+                    {{ statusMeta[currentDetail.status].label }}
+                  </n-tag>
+                </div>
               </n-grid-item>
             </n-grid>
             <div class="detail-content">

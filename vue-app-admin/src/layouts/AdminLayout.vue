@@ -106,7 +106,9 @@ const handleUserCommand = (key: string) => {
       </n-layout-header>
 
       <n-layout-content class="admin-content">
-        <router-view />
+        <n-scrollbar>
+          <router-view />
+        </n-scrollbar>
       </n-layout-content>
     </n-layout>
   </n-layout>
@@ -162,7 +164,7 @@ const handleUserCommand = (key: string) => {
 .admin-content {
   background: #FDFBF7;
   padding: 24px;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
 }
 
 @media (max-width: 768px) {

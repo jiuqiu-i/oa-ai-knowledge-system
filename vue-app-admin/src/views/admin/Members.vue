@@ -23,6 +23,7 @@ import {
   UserPlus,
   Pencil,
   Ban,
+  Check,
   Trash2,
   RefreshCw
 } from 'lucide-vue-next'
@@ -41,14 +42,12 @@ const page = ref<number>(1)
 const pageSize = ref<number>(10)
 
 const statusOptions: SelectOption[] = [
-  { label: '全部状态', value: undefined as unknown as string },
   { label: '在职', value: 'active' },
   { label: '离职', value: 'inactive' },
   { label: '待激活', value: 'pending' }
 ]
 
 const roleOptions: SelectOption[] = [
-  { label: '全部角色', value: undefined as unknown as string },
   { label: '管理员', value: 'admin' },
   { label: '普通成员', value: 'member' },
   { label: '访客', value: 'visitor' }
@@ -97,8 +96,7 @@ function resetAndFetch() {
 
 // 部门筛选选项（来源于后端 departments）
 const deptOptions = computed<SelectOption[]>(() => {
-  const fromStore = (memberStore.departments || []).map((d) => ({ label: d, value: d }))
-  return [{ label: '全部部门', value: undefined as unknown as string }, ...fromStore]
+  return (memberStore.departments || []).map((d) => ({ label: d, value: d }))
 })
 
 // 部门表单选项（用于新增/编辑成员）
@@ -137,7 +135,7 @@ const columns: DataTableColumns<User> = [
             quaternary: true,
             onClick: () => toggleStatus(row),
             title: row.status === 'active' ? '禁用' : '启用'
-          }, { icon: () => h(Ban, { size: 16 }) }),
+          }, { icon: () => h(row.status === 'active' ? Ban : Check, { size: 16 }) }),
           h(NButton, { size: 'small', quaternary: true, type: 'error', onClick: () => confirmDelete(row) }, { icon: () => h(Trash2, { size: 16 }) })
         ]
       })
@@ -266,9 +264,9 @@ function confirmDelete(row: User) {
               <Search :size="16" />
             </template>
           </n-input>
-          <n-select v-model:value="deptFilter" :options="deptOptions" style="width: 160px" />
-          <n-select v-model:value="statusFilter" :options="statusOptions" style="width: 140px" />
-          <n-select v-model:value="roleFilter" :options="roleOptions" style="width: 140px" />
+          <n-select placeholder="全部部门" clearable v-model:value="deptFilter" :options="deptOptions" style="width: 160px" />
+          <n-select placeholder="全部状态" clearable v-model:value="statusFilter" :options="statusOptions" style="width: 140px" />
+          <n-select placeholder="全部角色" clearable v-model:value="roleFilter" :options="roleOptions" style="width: 140px" />
           <n-button quaternary @click="resetAndFetch">
             <template #icon><RefreshCw :size="16" /></template>
             刷新
