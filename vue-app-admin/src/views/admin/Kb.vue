@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, h, onMounted } from 'vue'
+import { ref, computed, h, onMounted, watch, nextTick } from 'vue'
 import type { DataTableColumns, FormInst, FormRules, TreeOption, SelectOption, UploadFileInfo } from 'naive-ui'
 import {
   NCard,
@@ -18,6 +18,12 @@ import {
   NIcon,
   NTag,
   NPagination,
+  NDrawer,
+  NDrawerContent,
+  NAvatar,
+  NEmpty,
+  NDivider,
+  NSpin,
   useMessage,
   useDialog
 } from 'naive-ui'
@@ -31,96 +37,108 @@ import {
   Eye,
   Pencil,
   Trash2,
-  UploadCloud
+  UploadCloud,
+  RefreshCw
 } from 'lucide-vue-next'
-import type { KbDoc, KbDocStatus, KbCategory } from '@/types'
+import type { KbDoc, KbDocStatus } from '@/types'
 import { useKbStore } from '@/stores'
+import { getKbDocumentDetail } from '@/api/kb'
 
 const message = useMessage()
 const dialog = useDialog()
 const kbStore = useKbStore()
 
+const searchKeyword = ref('')
+const page = ref(1)
+const pageSize = ref(10)
+const selectedCategoryKey = ref<string | null>(null)
+
 // 后端可达时用真实数据覆盖演示数据
 onMounted(() => {
-  kbStore.fetchDocuments()
+  fetchFromApi()
   kbStore.fetchCategories()
 })
 
-const searchKeyword = ref('')
-const batchAction = ref<string | null>(null)
-const batchOptions: SelectOption[] = [
-  { label: '批量发布', value: 'publish' },
-  { label: '批量归档', value: 'archive' },
-  { label: '批量删除', value: 'delete' }
-]
+// 搜索 / 分类 / 分页变化 -> 重新调后端
+watch([searchKeyword, selectedCategoryKey, page, pageSize], () => {
+  fetchFromApi()
+})
 
-const treeData: TreeOption[] = [
-  {
-    label: '产品文档',
-    key: 'product',
-    prefix: () => h(NIcon, { color: '#E58A2E' }, { default: () => h(Folder) }),
-    children: [
-      { label: '需求文档', key: 'product-requirement' },
-      { label: '用户手册', key: 'product-manual' }
+function fetchFromApi() {
+  const params: Record<string, unknown> = {
+    page: page.value,
+    pageSize: pageSize.value
+  }
+  if (searchKeyword.value.trim()) params.keyword = searchKeyword.value.trim()
+  // 分类树选中后，把 label（即 category 名称）传给后端
+  if (selectedCategoryKey.value) {
+    const catLabel = findCategoryLabel(selectedCategoryKey.value)
+    if (catLabel) params.category = catLabel
+  }
+  kbStore.fetchDocuments(params)
+}
+
+function resetAndFetch() {
+  page.value = 1
+  fetchFromApi()
+}
+
+// ========== 分类：从 store 拿到 categories 后构造 NTree 需要的 TreeOption[] ==========
+const categoryTreeData = computed<TreeOption[]>(() => {
+  const cats = kbStore.categories || []
+  if (cats.length === 0) {
+    // 兜底：若后端还没返回，给一个"全部"占位
+    return [{ label: '未分类', key: '_uncategorized_', prefix: () => h(NIcon, { color: '#9F968A' }, { default: () => h(FolderX) }) }]
+  }
+  return cats.map((c) => ({
+    label: c.label,
+    key: c.key,
+    prefix: () => h(NIcon, { color: '#E58A2E' }, { default: () => h(Folder) })
+  }))
+})
+
+const categoryFormOptions = computed<SelectOption[]>(() => {
+  const cats = kbStore.categories || []
+  if (cats.length === 0) {
+    return [
+      { label: '产品文档', value: '产品文档' },
+      { label: '研发规范', value: '研发规范' },
+      { label: '销售手册', value: '销售手册' },
+      { label: '人事制度', value: '人事制度' },
+      { label: '培训资料', value: '培训资料' },
+      { label: '未分类', value: '未分类' }
     ]
-  },
-  {
-    label: '研发规范',
-    key: 'dev',
-    prefix: () => h(NIcon, { color: '#E58A2E' }, { default: () => h(Folder) }),
-    children: [
-      { label: '前端规范', key: 'dev-frontend' },
-      { label: 'API 文档', key: 'dev-api' }
-    ]
-  },
-  { label: '销售手册', key: 'sales', prefix: () => h(NIcon, { color: '#E58A2E' }, { default: () => h(Folder) }) },
-  { label: '人事制度', key: 'hr', prefix: () => h(NIcon, { color: '#E58A2E' }, { default: () => h(Folder) }) },
-  { label: '培训资料', key: 'training', prefix: () => h(NIcon, { color: '#E58A2E' }, { default: () => h(Folder) }) },
-  { label: '未分类', key: 'uncategorized', prefix: () => h(NIcon, { color: '#9F968A' }, { default: () => h(FolderX) }) }
-]
+  }
+  return cats.map((c) => ({ label: c.label, value: c.label }))
+})
 
-const categoryOptions: SelectOption[] = [
-  { label: '产品文档 / 需求文档', value: '产品文档 / 需求文档' },
-  { label: '产品文档 / 用户手册', value: '产品文档 / 用户手册' },
-  { label: '研发规范 / 前端规范', value: '研发规范 / 前端规范' },
-  { label: '研发规范 / API 文档', value: '研发规范 / API 文档' },
-  { label: '销售手册', value: '销售手册' },
-  { label: '人事制度', value: '人事制度' },
-  { label: '培训资料', value: '培训资料' },
-  { label: '未分类', value: '未分类' }
-]
+function findCategoryLabel(key: string): string | null {
+  const cat = (kbStore.categories || []).find((c) => c.key === key)
+  return cat ? cat.label : null
+}
 
+function onCategorySelect(keys: Array<string | number>) {
+  const key = keys[0] as string | undefined
+  selectedCategoryKey.value = key || null
+  page.value = 1
+}
+
+// ========== 状态 / 列配置 ==========
 const statusOptions: SelectOption[] = [
   { label: '已发布', value: '已发布' },
   { label: '草稿', value: '草稿' },
   { label: '已归档', value: '已归档' }
 ]
 
-const initialDocs: KbDoc[] = [
-  { id: 1, title: 'Oak OA 产品白皮书 v2.0', category: '产品文档 / 需求文档', author: '林晓', updatedAt: '2026-08-15', status: '已发布', statusType: 'success' },
-  { id: 2, title: '销售话术与竞品对比 Q3', category: '销售手册', author: '王磊', updatedAt: '2026-08-14', status: '草稿', statusType: 'warning' },
-  { id: 3, title: '前端代码规范 v3.1', category: '研发规范 / 前端规范', author: '陈晨', updatedAt: '2026-08-12', status: '已发布', statusType: 'success' },
-  { id: 4, title: '新员工入职指南', category: '人事制度', author: '赵敏', updatedAt: '2026-08-10', status: '已归档', statusType: 'default' },
-  { id: 5, title: 'AI 接入配置说明', category: '产品文档 / 用户手册', author: '刘洋', updatedAt: '2026-08-09', status: '已发布', statusType: 'success' },
-  { id: 6, title: '培训资料：高效会议管理', category: '培训资料', author: '孙婷', updatedAt: '2026-08-08', status: '草稿', statusType: 'warning' }
-]
-kbStore.setDocuments(initialDocs)
-kbStore.setCategories(treeData as unknown as KbCategory[])
+function getStatusType(status: KbDocStatus): KbDoc['statusType'] {
+  return status === '已发布' ? 'success' : status === '草稿' ? 'warning' : 'default'
+}
 
-const filteredDocuments = computed(() => {
-  if (!searchKeyword.value) return kbStore.documents
-  const keyword = searchKeyword.value.toLowerCase()
-  return kbStore.documents.filter(doc =>
-    doc.title.toLowerCase().includes(keyword) ||
-    doc.author.toLowerCase().includes(keyword)
-  )
-})
+const tableData = computed<KbDoc[]>(() => kbStore.documents)
+const total = computed<number>(() => kbStore.total || kbStore.documents.length)
 
 const columns: DataTableColumns<KbDoc> = [
-  {
-    type: 'selection'
-  },
-  { title: '文档名称', key: 'title' },
+  { title: '文档名称', key: 'title', render: (row) => h(NButton, { text: true, type: 'primary', onClick: () => viewDoc(row) }, { default: () => row.title }) },
   { title: '所属分类', key: 'category' },
   { title: '作者', key: 'author' },
   { title: '更新时间', key: 'updatedAt' },
@@ -147,6 +165,7 @@ const columns: DataTableColumns<KbDoc> = [
   }
 ]
 
+// ========== 上传 / 编辑 Modal ==========
 const showDocModal = ref(false)
 const modalMode = ref<'upload' | 'edit'>('upload')
 const editingDoc = ref<KbDoc | null>(null)
@@ -154,7 +173,6 @@ const formRef = ref<FormInst | null>(null)
 const formValue = ref({
   title: '',
   category: null as string | null,
-  author: '',
   status: '已发布' as KbDocStatus,
   content: ''
 })
@@ -163,12 +181,7 @@ const fileList = ref<UploadFileInfo[]>([])
 const rules: FormRules = {
   title: { required: true, message: '请输入文档标题', trigger: 'blur' },
   category: { required: true, message: '请选择分类', trigger: 'change' },
-  author: { required: true, message: '请输入作者', trigger: 'blur' },
   status: { required: true, message: '请选择状态', trigger: 'change' }
-}
-
-function getStatusType(status: KbDocStatus): KbDoc['statusType'] {
-  return status === '已发布' ? 'success' : status === '草稿' ? 'warning' : 'default'
 }
 
 function openDocModal(mode: 'upload' | 'edit', row: KbDoc | null = null) {
@@ -178,12 +191,12 @@ function openDocModal(mode: 'upload' | 'edit', row: KbDoc | null = null) {
     formValue.value = {
       title: row.title,
       category: row.category,
-      author: row.author,
       status: row.status,
       content: row.content || ''
     }
   } else {
-    formValue.value = { title: '', category: null, author: '', status: '已发布', content: '' }
+    const defaultCat = categoryFormOptions.value[0]?.value as string | undefined
+    formValue.value = { title: '', category: defaultCat ?? null, status: '已发布', content: '' }
     fileList.value = []
   }
   showDocModal.value = true
@@ -194,53 +207,73 @@ function closeDocModal() {
   editingDoc.value = null
 }
 
-function submitDoc() {
-  formRef.value?.validate((errors) => {
-    if (errors) return
-    const payload: Omit<KbDoc, 'id' | 'updatedAt'> = {
-      title: formValue.value.title,
-      category: formValue.value.category as string,
-      author: formValue.value.author,
-      status: formValue.value.status,
-      statusType: getStatusType(formValue.value.status),
-      content: formValue.value.content,
-      attachment: fileList.value[0]?.name || null
-    }
-    if (modalMode.value === 'edit' && editingDoc.value) {
-      kbStore.updateDocument(editingDoc.value.id, payload)
-      message.success('文档已更新')
-    } else {
-      kbStore.createDocument(payload)
-      message.success('文档已上传')
-    }
-    closeDocModal()
-  })
+async function submitDoc() {
+  const errors = await new Promise<unknown>((resolve) => formRef.value?.validate(resolve))
+  if (errors) return
+  const payload = {
+    title: formValue.value.title,
+    category: formValue.value.category as string,
+    author: '',
+    status: formValue.value.status,
+    statusType: getStatusType(formValue.value.status),
+    content: formValue.value.content,
+    attachment: fileList.value[0]?.name || null
+  }
+  if (modalMode.value === 'edit' && editingDoc.value) {
+    await kbStore.updateDocument(editingDoc.value.id, payload)
+    message.success('文档已更新')
+  } else {
+    await kbStore.createDocument(payload)
+    message.success('文档已上传')
+  }
+  closeDocModal()
+  nextTick(() => fetchFromApi())
 }
 
-function viewDoc(row: KbDoc) {
-  message.info(`查看文档：${row.title}`)
+// ========== 查看详情 Drawer ==========
+const docDetailVisible = ref(false)
+const activeDoc = ref<KbDoc | null>(null)
+const docDetailLoading = ref(false)
+
+async function viewDoc(row: KbDoc) {
+  docDetailVisible.value = true
+  activeDoc.value = { ...row }
+  // 尝试从后端拿详情内容（含 content / summary / tags / views 等）
+  docDetailLoading.value = true
+  try {
+    const { data } = await getKbDocumentDetail(String(row.id))
+    activeDoc.value = {
+      ...activeDoc.value,
+      content: data.content || activeDoc.value?.content,
+      category: data.category || activeDoc.value?.category,
+      author: data.author?.name || activeDoc.value?.author,
+      updatedAt: (data.updatedAt || data.createdAt || '').slice(0, 10)
+    }
+  } catch {
+    // 若后端无详情接口，保留表格行数据即可
+  } finally {
+    docDetailLoading.value = false
+  }
 }
 
+// ========== 删除确认 ==========
 function confirmDelete(row: KbDoc) {
   dialog.warning({
     title: '确认删除',
     content: `确定要删除《${row.title}》吗？`,
     positiveText: '确认删除',
     negativeText: '取消',
-    onPositiveClick: () => {
-      kbStore.deleteDocument(row.id)
+    onPositiveClick: async () => {
+      await kbStore.deleteDocument(row.id)
       message.success('文档已删除')
+      nextTick(() => fetchFromApi())
     }
   })
 }
 
+// ========== 功能入口：后端暂不支持的操作给出明确提示，而不是"什么都不发生" ==========
 function createCategory() {
-  message.info('新建分类功能演示')
-}
-
-function handleBatchAction(value: string) {
-  message.info(`批量操作：${batchOptions.find(o => o.value === value)?.label}`)
-  batchAction.value = null
+  message.info('分类管理功能暂未开放，当前分类可由文档上传时自动创建。')
 }
 </script>
 
@@ -249,11 +282,17 @@ function handleBatchAction(value: string) {
     <!-- Toolbar -->
     <n-card class="toolbar-card">
       <n-space justify="space-between" align="center" wrap>
-        <n-input v-model:value="searchKeyword" placeholder="搜索文档名称、作者..." style="width: 320px">
-          <template #prefix>
-            <Search :size="16" />
-          </template>
-        </n-input>
+        <n-space wrap>
+          <n-input v-model:value="searchKeyword" placeholder="搜索文档名称、作者..." style="width: 320px" clearable @keyup.enter="resetAndFetch">
+            <template #prefix>
+              <Search :size="16" />
+            </template>
+          </n-input>
+          <n-button quaternary @click="resetAndFetch">
+            <template #icon><RefreshCw :size="16" /></template>
+            刷新
+          </n-button>
+        </n-space>
         <n-space>
           <n-button @click="createCategory">
             <template #icon>
@@ -267,7 +306,6 @@ function handleBatchAction(value: string) {
             </template>
             上传文档
           </n-button>
-          <n-select v-model:value="batchAction" :options="batchOptions" placeholder="批量操作" style="width: 140px" clearable @update:value="handleBatchAction" />
         </n-space>
       </n-space>
     </n-card>
@@ -284,54 +322,63 @@ function handleBatchAction(value: string) {
         </template>
         <n-tree
           block-line
-          :data="treeData"
+          :data="categoryTreeData"
           default-expand-all
           selectable
+          clearable
+          @update:selected-keys="onCategorySelect"
         />
       </n-card>
 
       <n-card class="table-card" :bordered="false">
+        <n-empty v-if="!kbStore.loading && tableData.length === 0" description="暂无文档，点击右上角「上传文档」创建" />
         <n-data-table
+          v-else
           :columns="columns"
-          :data="filteredDocuments"
+          :data="tableData"
           :bordered="false"
           :single-line="false"
           size="small"
+          :loading="kbStore.loading"
+          remote
         />
         <div class="pagination-bar">
-          <span class="pagination-text">共 124 条，每页 10 条</span>
-          <n-pagination :page="1" :page-size="10" :item-count="124" />
+          <span class="pagination-text">共 {{ total }} 条，每页 {{ pageSize }} 条</span>
+          <n-pagination
+            v-model:page="page"
+            v-model:page-size="pageSize"
+            :item-count="total"
+            :page-sizes="[10, 20, 50]"
+            show-size-picker
+          />
         </div>
       </n-card>
     </div>
 
     <!-- Upload/Edit modal -->
-    <n-modal v-model:show="showDocModal" :title="modalMode === 'edit' ? '编辑文档' : '上传/新增文档'" preset="card" style="width: 560px">
+    <n-modal v-model:show="showDocModal" :title="modalMode === 'edit' ? '编辑文档' : '上传/新增文档'" preset="card" style="width: 560px; max-width: 90vw;">
       <n-form ref="formRef" :model="formValue" :rules="rules" label-placement="top">
         <n-form-item label="文档标题" path="title">
           <n-input v-model:value="formValue.title" placeholder="请输入文档标题" />
         </n-form-item>
         <n-form-item label="所属分类" path="category">
-          <n-select v-model:value="formValue.category" :options="categoryOptions" placeholder="请选择分类" />
-        </n-form-item>
-        <n-form-item label="作者" path="author">
-          <n-input v-model:value="formValue.author" placeholder="请输入作者" />
+          <n-select v-model:value="formValue.category" :options="categoryFormOptions" filterable allow-create placeholder="请选择或输入分类" />
         </n-form-item>
         <n-form-item label="状态" path="status">
           <n-select v-model:value="formValue.status" :options="statusOptions" />
         </n-form-item>
         <n-form-item label="文档内容">
-          <n-input v-model:value="formValue.content" type="textarea" :rows="5" placeholder="请输入文档内容" />
+          <n-input v-model:value="formValue.content" type="textarea" :rows="5" placeholder="请输入文档内容（可选）" />
         </n-form-item>
-        <n-form-item label="上传附件">
-          <n-upload v-model:file-list="fileList" :max="1">
+        <n-form-item label="上传附件（演示，不真正上传）">
+          <n-upload v-model:file-list="fileList" :max="1" :show-file-list="true">
             <n-upload-dragger>
               <div style="margin-bottom: 8px">
                 <n-icon size="32" :depth="3">
                   <UploadCloud />
                 </n-icon>
               </div>
-              <n-text style="font-size: 14px">点击选择文件（演示）</n-text>
+              <n-text style="font-size: 14px">点击选择文件（演示模式）</n-text>
             </n-upload-dragger>
           </n-upload>
         </n-form-item>
@@ -343,6 +390,36 @@ function handleBatchAction(value: string) {
         </n-space>
       </template>
     </n-modal>
+
+    <!-- Doc detail drawer -->
+    <n-drawer v-model:show="docDetailVisible" :width="560" placement="right">
+      <n-drawer-content v-if="activeDoc" :title="activeDoc.title" closable>
+        <div class="detail-inner">
+          <n-spin :show="docDetailLoading">
+            <n-space vertical :size="16">
+              <n-space :size="12" wrap>
+                <n-tag round size="small" type="primary">{{ activeDoc.category }}</n-tag>
+                <n-tag round size="small" :type="activeDoc.statusType as never">{{ activeDoc.status }}</n-tag>
+              </n-space>
+              <n-space align="center" :size="10">
+                <n-avatar round size="small" :style="{ background: 'var(--oak-primary, #E58A2E)', color: '#fff' }">
+                  {{ (activeDoc.author || '文').charAt(0) }}
+                </n-avatar>
+                <span style="font-size: 14px; color: #2A261F;">{{ activeDoc.author || '未知作者' }}</span>
+                <span style="font-size: 12px; color: #9F968A;">更新于 {{ activeDoc.updatedAt }}</span>
+              </n-space>
+              <n-divider />
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: #2A261F; margin-bottom: 8px;">文档内容</div>
+                <div class="doc-body">
+                  {{ activeDoc.content || '（该文档暂未提供详情内容）' }}
+                </div>
+              </div>
+            </n-space>
+          </n-spin>
+        </div>
+      </n-drawer-content>
+    </n-drawer>
   </div>
 </template>
 
@@ -406,11 +483,26 @@ function handleBatchAction(value: string) {
   color: #9F968A;
 }
 
+.detail-inner {
+  padding: 4px 4px 16px;
+}
+
+.doc-body {
+  background: #F7F4EF;
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #6E665B;
+  white-space: pre-wrap;
+  max-height: 50vh;
+  overflow: auto;
+}
+
 @media (max-width: 768px) {
   .content-wrap {
     flex-direction: column;
   }
-
   .category-card {
     width: 100%;
   }

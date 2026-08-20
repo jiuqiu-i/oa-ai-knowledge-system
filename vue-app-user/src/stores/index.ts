@@ -149,6 +149,8 @@ export const useApprovalStore = defineStore('approval', () => {
     { id: 3, title: '本月绩效考核自评', from: '人事行政', time: '截止时间 8 月 20 日', type: 'appraisal', status: 'pending', level: 'info' }
   ])
 
+  const loading = ref(false)
+
   const stats = ref<ApprovalStats>({
     pending: 5,
     processing: 2,
@@ -166,11 +168,14 @@ export const useApprovalStore = defineStore('approval', () => {
 
   /** 拉取我的申请 */
   const fetchMyApprovals = async () => {
+    loading.value = true
     try {
       const { data } = await getMyApprovals({ page: 1, pageSize: 20 })
       approvals.value = data.list.map(formatApiApproval)
     } catch {
       // 接口异常时保留现有列表
+    } finally {
+      loading.value = false
     }
   }
 
@@ -179,7 +184,8 @@ export const useApprovalStore = defineStore('approval', () => {
     try {
       const { data } = await getPendingStats()
       stats.value.pending = data.pendingCount
-      stats.value.processing = approvals.value.filter((a) => a.status === 'pending').length
+      // processing/completed 以我的申请列表中的分类计算（后端未直接暴露）
+      stats.value.processing = approvals.value.filter((a) => a.status === 'pending' || a.status === 'processing').length
       stats.value.completed = approvals.value.filter((a) => a.status === 'completed').length
     } catch {
       // 静默
@@ -213,7 +219,7 @@ export const useApprovalStore = defineStore('approval', () => {
     }
   }
 
-  return { approvals, stats, pendingCount, fetchMyApprovals, fetchStats, addApproval }
+  return { approvals, loading, stats, pendingCount, fetchMyApprovals, fetchStats, addApproval }
 })
 
 // ============================================================

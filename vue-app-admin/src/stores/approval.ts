@@ -5,9 +5,10 @@ import {
   getApprovalList,
   approveApproval,
   rejectApproval,
-  deleteApproval
+  deleteApproval,
+  createApproval as apiCreateApproval
 } from '@/api/approval'
-import type { ApiApproval, ApprovalQueryParams } from '@/types'
+import type { ApiApproval, ApprovalQueryParams, CreateApprovalPayload, ApiApprovalType } from '@/types'
 
 /**
  * 视图模型 <-> 后端实体映射
@@ -21,6 +22,16 @@ const typeApiToView = (t: ApiApproval['type']): ApprovalType => {
     case 'procurement': return 'purchase'
     case 'business_trip': return 'seal'
     default: return 'seal'
+  }
+}
+
+const typeViewToApi = (t: ApprovalType): ApiApprovalType => {
+  switch (t) {
+    case 'leave': return 'leave'
+    case 'reimburse': return 'expense'
+    case 'purchase': return 'procurement'
+    case 'seal': return 'business_trip'
+    default: return 'other'
   }
 }
 
@@ -118,6 +129,37 @@ export const useApprovalStore = defineStore('approval', () => {
     approvals.value = approvals.value.filter((a) => String(a.id) !== String(id))
   }
 
+  /** 管理端新建审批（走后端 createApproval 接口）*/
+  const createItem = async (payload: { title: string; type: ApprovalType; content: string; amount?: number | null }) => {
+    try {
+      const body: CreateApprovalPayload = {
+        title: payload.title,
+        type: typeViewToApi(payload.type),
+        content: payload.content || '（无内容）',
+        urgency: 'medium'
+      }
+      if (payload.amount != null) body.amount = Number(payload.amount)
+      const { data } = await apiCreateApproval(body)
+      approvals.value.unshift(formatApiToView(data))
+      total.value += 1
+    } catch {
+      // 演示模式回退：本地占位
+      approvals.value.unshift({
+        id: `local-${Date.now()}`,
+        title: payload.title,
+        applicant: '当前用户',
+        type: payload.type,
+        amount: payload.amount ?? null,
+        submitTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        approver: '待指定',
+        status: 'pending',
+        content: payload.content,
+        timeline: [{ time: new Date().toLocaleString('zh-CN', { hour12: false }), actor: '当前用户', action: '提交申请' }]
+      })
+      total.value += 1
+    }
+  }
+
   return {
     approvals,
     loading,
@@ -131,6 +173,7 @@ export const useApprovalStore = defineStore('approval', () => {
     getApprovalById,
     approveItem,
     rejectItem,
-    deleteItem
+    deleteItem,
+    createItem
   }
 })

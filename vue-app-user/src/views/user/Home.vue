@@ -30,21 +30,30 @@
       <n-grid-item span="1 l:2" class="left-col">
         <n-space vertical :size="24">
           <!-- Todo -->
-          <n-card title="待办事项" class="panel-card">
+          <n-card title="我的申请" class="panel-card">
             <template #header-extra>
-              <n-tag round size="small">{{ approvalStore.pendingCount }}</n-tag>
+              <n-space align="center" :size="8">
+                <n-tag round size="small">{{ approvalStore.pendingCount }}</n-tag>
+                <n-button text type="primary" size="small" @click="refreshApprovals">刷新</n-button>
+              </n-space>
             </template>
-            <n-list hoverable clickable>
-              <n-list-item v-for="item in approvalStore.approvals" :key="item.id">
+            <n-empty v-if="!approvalStore.loading && approvalStore.approvals.length === 0" description="暂无申请记录，去发起一个审批吧" size="small" />
+            <n-list v-else hoverable clickable>
+              <n-list-item v-for="item in approvalStore.approvals" :key="item.id" @click="openApprovalDetail(item)">
                 <n-thing>
                   <template #avatar>
                     <span class="status-dot" :style="{ background: levelColor(item.level) }" />
                   </template>
-                  <template #header>{{ item.title }}</template>
+                  <template #header>
+                    <n-space align="center" :size="8">
+                      <span>{{ item.title }}</span>
+                      <n-tag size="tiny" round :type="statusTagType(item.status)" :bordered="false">{{ statusLabel(item.status) }}</n-tag>
+                    </n-space>
+                  </template>
                   <template #description>{{ item.from }} · {{ item.time }}</template>
                 </n-thing>
                 <template #suffix>
-                  <n-button text type="primary">处理</n-button>
+                  <n-button text type="primary" size="small" @click.stop="openApprovalDetail(item)">查看</n-button>
                 </template>
               </n-list-item>
             </n-list>
@@ -69,9 +78,10 @@
           <!-- Recent docs -->
           <n-card title="最近文档" class="panel-card">
             <template #header-extra>
-              <n-button text type="primary">查看全部</n-button>
+              <n-button text type="primary" @click="goKb">查看全部</n-button>
             </template>
-            <n-data-table
+            <n-empty v-if="recentDocs.length === 0" description="暂无文档" size="small" />
+            <n-data-table v-else
               :columns="docColumns"
               :data="recentDocs"
               :bordered="false"
@@ -105,9 +115,10 @@
           </n-card>
 
           <!-- Schedule -->
-          <n-card title="日程 / 会议" class="panel-card">
+          <n-card title="审批动态" class="panel-card">
             <n-space vertical :size="16">
-              <div v-for="(evt, idx) in events" :key="idx" class="event-row">
+              <n-empty v-if="approvalTimeline.length === 0" description="暂无动态" size="small" />
+              <div v-for="(evt, idx) in approvalTimeline" :key="idx" class="event-row">
                 <div
                   class="event-date"
                   :class="{ 'event-date-primary': idx === 0 }"
@@ -118,33 +129,23 @@
                 <div class="event-body">
                   <p class="oak-body" style="font-weight: 500;">{{ evt.title }}</p>
                   <p class="oak-caption">{{ evt.time }} · {{ evt.location }}</p>
-                  <n-space v-if="evt.members" :size="4" class="members">
-                    <n-avatar
-                      v-for="m in evt.members"
-                      :key="m"
-                      round
-                      size="small"
-                      :style="{ background: 'var(--oak-muted)', color: 'var(--oak-ink-2)' }"
-                    >
-                      {{ m }}
-                    </n-avatar>
-                  </n-space>
                 </div>
               </div>
             </n-space>
           </n-card>
 
           <!-- Team feed -->
-          <n-card title="团队动态" class="panel-card">
+          <n-card title="文档动态" class="panel-card">
             <n-space vertical :size="16">
-              <div v-for="feed in teamFeeds" :key="feed.id" class="feed-row">
-                <n-avatar round size="small" :style="{ background: 'var(--oak-muted)', color: 'var(--oak-ink-2)' }">
+              <n-empty v-if="docFeeds.length === 0" description="暂无文档更新" size="small" />
+              <div v-for="feed in docFeeds" :key="feed.id" class="feed-row">
+                <n-avatar round size="small" :style="{ background: 'var(--oak-primary)', color: '#fff' }">
                   {{ feed.avatar }}
                 </n-avatar>
                 <div>
                   <p class="oak-body">
                     <span style="font-weight: 500;">{{ feed.user }}</span> {{ feed.action }}
-                    <n-button text type="primary" size="tiny">{{ feed.target }}</n-button>
+                    <n-button text type="primary" size="tiny" @click="goKb">{{ feed.target }}</n-button>
                   </p>
                   <p class="oak-caption">{{ feed.time }}</p>
                 </div>
@@ -185,8 +186,8 @@
         <n-form-item label="文档标题" path="title">
           <n-input v-model:value="docForm.title" placeholder="请输入文档标题" />
         </n-form-item>
-        <n-form-item label="所属空间" path="space">
-          <n-select v-model:value="docForm.space" :options="docSpaceOptions" />
+        <n-form-item label="所属分类" path="space">
+          <n-select v-model:value="docForm.space" :options="computedDocSpaceOptions" />
         </n-form-item>
         <n-form-item label="文档类型" path="docType">
           <n-select v-model:value="docForm.docType" :options="docTypeOptions" />
@@ -199,6 +200,44 @@
         </n-space>
       </template>
     </n-modal>
+
+    <!-- Approval detail drawer -->
+    <n-drawer v-model:show="detailVisible" :width="460" placement="right">
+      <n-drawer-content v-if="currentApproval" title="申请详情" closable>
+        <div class="drawer-body">
+          <n-space vertical :size="16">
+            <div>
+              <div class="drawer-label">审批标题</div>
+              <div class="drawer-value" style="font-weight:600;font-size:16px;">{{ currentApproval.title }}</div>
+            </div>
+            <n-grid :cols="2" :x-gap="16">
+              <n-grid-item>
+                <div class="drawer-label">申请类型</div>
+                <div class="drawer-value">{{ approvalTypeLabelMap[currentApproval.type] || currentApproval.type }}</div>
+              </n-grid-item>
+              <n-grid-item>
+                <div class="drawer-label">当前状态</div>
+                <div class="drawer-value">
+                  <n-tag round :type="statusTagType(currentApproval.status)" :bordered="false">{{ statusLabel(currentApproval.status) }}</n-tag>
+                </div>
+              </n-grid-item>
+              <n-grid-item v-if="currentApproval.amount != null && currentApproval.amount !== undefined">
+                <div class="drawer-label">金额</div>
+                <div class="drawer-value">¥ {{ Number(currentApproval.amount).toLocaleString('zh-CN') }}</div>
+              </n-grid-item>
+              <n-grid-item>
+                <div class="drawer-label">申请人 / 时间</div>
+                <div class="drawer-value">{{ currentApproval.from }} · {{ currentApproval.time }}</div>
+              </n-grid-item>
+            </n-grid>
+            <div>
+              <div class="drawer-label">审批内容</div>
+              <div class="drawer-value content-box">{{ currentApproval.content || '（未填写）' }}</div>
+            </div>
+          </n-space>
+        </div>
+      </n-drawer-content>
+    </n-drawer>
   </main>
 </template>
 
@@ -211,12 +250,13 @@ import type {
   FormRules,
   FormItemRule,
   FormValidationError,
-  DataTableColumns
+  DataTableColumns,
+  TagProps
 } from 'naive-ui'
 import {
   NCard, NSpace, NButton, NGrid, NGridItem, NList, NListItem,
   NThing, NTag, NDataTable, NModal, NForm, NFormItem, NInput,
-  NSelect, NInputNumber, NAvatar
+  NSelect, NInputNumber, NAvatar, NDrawer, NDrawerContent, NEmpty
 } from 'naive-ui'
 import {
   FilePlus, FileText, Sparkles, Clock, Loader2, Check,
@@ -225,7 +265,7 @@ import {
 import { useUserStore, useApprovalStore, useKbStore } from '@/stores'
 import { createDoc } from '@/api/kb'
 import type { Component } from 'vue'
-import type { ApprovalType } from '@/types'
+import type { Approval, ApprovalType, ApprovalStatus } from '@/types'
 
 const router = useRouter()
 const message = useMessage()
@@ -234,17 +274,25 @@ const approvalStore = useApprovalStore()
 const kbStore = useKbStore()
 
 const goAi = () => router.push('/ai')
+const goKb = () => router.push('/kb')
 
-// 进入首页时尝试恢复登录态并拉取我的审批与知识库数据（后端不可达时保留演示数据）
+// 进入首页时尝试恢复登录态并拉取我的审批与知识库数据
 onMounted(async () => {
   await userStore.fetchProfile()
   await Promise.all([
     approvalStore.fetchMyApprovals(),
     approvalStore.fetchStats(),
+    kbStore.fetchCategories(),
     kbStore.fetchHotDocs(),
     kbStore.fetchDocs({ pageSize: 5 }),
   ])
 })
+
+const refreshApprovals = async () => {
+  await approvalStore.fetchMyApprovals()
+  await approvalStore.fetchStats()
+  message.success('已刷新')
+}
 
 const today = new Date()
 const todayText = `${today.getFullYear()} 年 ${today.getMonth() + 1} 月 ${today.getDate()} 日`
@@ -252,8 +300,24 @@ const hour = today.getHours()
 const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好'
 
 const levelColor = (level: string): string => {
-  const map: Record<string, string> = { error: '#EA4335', warning: '#F5B800', info: '#2E90FA' }
+  const map: Record<string, string> = { error: '#EA4335', warning: '#F5B800', urgent: '#EA4335', info: '#2E90FA' }
   return map[level] || '#9F968A'
+}
+
+const statusLabel = (s: ApprovalStatus): string => {
+  const map: Record<ApprovalStatus, string> = { pending: '待审批', processing: '审批中', completed: '已通过', rejected: '已驳回' }
+  return map[s] || s
+}
+const statusTagType = (s: ApprovalStatus): TagProps['type'] => {
+  const map: Record<ApprovalStatus, TagProps['type']> = {
+    pending: 'warning', processing: 'info', completed: 'success', rejected: 'error'
+  }
+  return map[s] || 'default'
+}
+
+const approvalTypeLabelMap: Record<ApprovalType, string> = {
+  leave: '请假', reimburse: '报销', purchase: '采购', seal: '用印',
+  budget: '预算', meeting: '会议', appraisal: '绩效', other: '其他'
 }
 
 interface ApprovalStatItem {
@@ -264,9 +328,9 @@ interface ApprovalStatItem {
 }
 
 const approvalStatList = computed<ApprovalStatItem[]>(() => [
-  { label: '待我审批', value: approvalStore.stats.pending, hint: '较昨日 +1', icon: Clock },
-  { label: '审批中', value: approvalStore.stats.processing, hint: '平均 1.5 天', icon: Loader2 },
-  { label: '本月已审批', value: approvalStore.stats.completed, hint: '全部准时', icon: Check }
+  { label: '待处理', value: approvalStore.stats.pending, hint: '待我处理或审批中', icon: Clock },
+  { label: '审批中', value: approvalStore.stats.processing, hint: '流程进行中', icon: Loader2 },
+  { label: '已完成', value: approvalStore.stats.completed, hint: '历史已办结', icon: Check }
 ])
 
 interface RecentDoc {
@@ -277,17 +341,13 @@ interface RecentDoc {
 
 const recentDocs = computed<RecentDoc[]>(() => {
   if (kbStore.docs.length > 0) {
-    return kbStore.docs.slice(0, 3).map((d) => ({
+    return kbStore.docs.slice(0, 5).map((d) => ({
       name: d.title,
       space: d.category,
       updated: d.updated
     }))
   }
-  return [
-    { name: '项目周报 2026-W33', space: '产品知识库', updated: '昨天 18:20' },
-    { name: 'Q3 销售数据看板', space: '销售部门', updated: '8 月 14 日' },
-    { name: 'API 接口规范 v2.1', space: '技术研发', updated: '8 月 12 日' }
-  ]
+  return []
 })
 
 const docColumns: DataTableColumns<RecentDoc> = [
@@ -308,29 +368,47 @@ const kbRecommendations = computed<KbRecommendation[]>(() => {
       meta: `${d.category} · ${d.views} 次阅读`
     }))
   }
-  return [
-    { title: '新员工入职指南', meta: '人事行政 · 128 次阅读' },
-    { title: '高效会议记录模板', meta: '效率办公 · 86 次阅读' },
-    { title: '费用报销流程说明', meta: '财务制度 · 204 次阅读' }
-  ]
+  return []
 })
 
-interface CalendarEvent {
+// ---------- 审批动态：基于我的审批真实数据生成 ----------
+interface TimelineEvent {
   month: string
   day: string
   title: string
   time: string
   location: string
-  members?: string[]
 }
 
-const events: CalendarEvent[] = [
-  { month: '8 月', day: '16', title: '产品周会', time: '14:00 - 15:00', location: '线上', members: ['张', '李', '+3'] },
-  { month: '8 月', day: '17', title: '月度复盘会', time: '10:00 - 12:00', location: '会议室 A' }
-]
+const parseApprovalTime = (time: string): Date => {
+  // 支持 'YYYY-MM-DD HH:mm' 或 '2 小时前' 等格式
+  if (time.includes('-') || time.includes('T')) {
+    return new Date(time.replace(' ', 'T'))
+  }
+  return new Date()
+}
 
-interface TeamFeed {
-  id: number
+const approvalTimeline = computed<TimelineEvent[]>(() => {
+  const list = [...approvalStore.approvals].slice(0, 4)
+  if (list.length === 0) return []
+  return list.map((a) => {
+    const d = parseApprovalTime(a.time)
+    const monthStr = `${d.getMonth() + 1} 月`
+    const dayStr = String(d.getDate())
+    const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    return {
+      month: monthStr,
+      day: dayStr,
+      title: `【${statusLabel(a.status)}】${a.title}`,
+      time: hm,
+      location: `${a.from} · 类型：${approvalTypeLabelMap[a.type] || a.type}`
+    }
+  })
+})
+
+// ---------- 文档动态：基于知识库文档数据生成 ----------
+interface DocFeed {
+  id: string | number
   avatar: string
   user: string
   action: string
@@ -338,13 +416,27 @@ interface TeamFeed {
   time: string
 }
 
-const teamFeeds: TeamFeed[] = [
-  { id: 1, avatar: '王', user: '王芳', action: '更新了', target: '客户需求文档', time: '30 分钟前' },
-  { id: 2, avatar: '陈', user: '陈晨', action: '完成了合同审批', target: '', time: '1 小时前' },
-  { id: 3, avatar: '李', user: '李经理', action: '在知识库发布了', target: 'Q3 战略目标解读', time: '3 小时前' }
-]
+const docFeeds = computed<DocFeed[]>(() => {
+  const list = kbStore.docs.length > 0 ? kbStore.docs : kbStore.hotDocs
+  return list.slice(0, 4).map((d) => ({
+    id: d.id,
+    avatar: (d.author || '知').charAt(0),
+    user: d.author || '知识库',
+    action: '更新了文档',
+    target: d.title,
+    time: d.updated
+  }))
+})
 
-// Approval modal
+// ---------- 审批详情抽屉 ----------
+const detailVisible = ref(false)
+const currentApproval = ref<Approval | null>(null)
+const openApprovalDetail = (item: Approval) => {
+  currentApproval.value = item
+  detailVisible.value = true
+}
+
+// ---------- 发起审批 Modal ----------
 interface ApprovalForm {
   title: string
   type: ApprovalType
@@ -375,15 +467,22 @@ const openApprovalModal = () => {
 }
 
 const submitApproval = () => {
-  approvalFormRef.value?.validate((errors?: FormValidationError[]) => {
+  approvalFormRef.value?.validate(async (errors?: FormValidationError[]) => {
     if (errors) return
-    approvalStore.addApproval(approvalForm.value)
-    message.success('审批已提交')
-    approvalVisible.value = false
+    try {
+      await approvalStore.addApproval(approvalForm.value)
+      message.success('审批已提交')
+      approvalVisible.value = false
+      // 提交后刷新列表和统计
+      await approvalStore.fetchMyApprovals()
+      await approvalStore.fetchStats()
+    } catch (e) {
+      message.error('提交失败，请检查网络或后端服务')
+    }
   })
 }
 
-// Doc modal
+// ---------- 新建文档 Modal ----------
 interface DocForm {
   title: string
   space: string
@@ -408,8 +507,16 @@ const docTypeOptions = [
   { label: '幻灯片', value: 'slide' }
 ]
 
+// 文档空间选项来源于后端分类（若无分类则回退到默认选项）
+const computedDocSpaceOptions = computed(() => {
+  const fromStore = (kbStore.categories || []).filter((c) => c.key !== 'all').map((c) => ({ label: c.label, value: c.key }))
+  if (fromStore.length > 0) return fromStore
+  return docSpaceOptions
+})
+
 const openDocModal = () => {
-  docForm.value = { title: '', space: 'product', docType: 'doc' }
+  const opts = computedDocSpaceOptions.value
+  docForm.value = { title: '', space: opts[0]?.value || 'product', docType: 'doc' }
   docVisible.value = true
 }
 
@@ -417,17 +524,21 @@ const submitDoc = () => {
   docFormRef.value?.validate(async (errors?: FormValidationError[]) => {
     if (errors) return
     try {
-      const spaceLabel = docSpaceOptions.find((o) => o.value === docForm.value.space)?.label || docForm.value.space
+      const opts = computedDocSpaceOptions.value
+      const category = opts.find((o) => o.value === docForm.value.space)?.label || docForm.value.space
       await createDoc({
         title: docForm.value.title,
-        category: spaceLabel,
+        category,
         content: '',
       })
       message.success(`文档「${docForm.value.title}」创建成功`)
+      docVisible.value = false
+      // 创建后刷新文档列表和推荐
+      await kbStore.fetchDocs({ pageSize: 5 })
+      await kbStore.fetchHotDocs()
     } catch {
       message.error('文档创建失败，请检查网络或后端服务')
     }
-    docVisible.value = false
   })
 }
 </script>
@@ -527,13 +638,29 @@ const submitDoc = () => {
   min-width: 0;
   flex: 1;
 }
-.members {
-  margin-top: 8px;
-}
 .feed-row {
   display: flex;
   gap: 12px;
   align-items: flex-start;
 }
 .mt-1 { margin-top: 4px; }
+.drawer-body {
+  padding: 8px 4px 16px;
+}
+.drawer-label {
+  font-size: 12px;
+  color: var(--oak-ink-3);
+  margin-bottom: 4px;
+}
+.drawer-value {
+  font-size: 14px;
+  color: var(--oak-ink);
+  line-height: 1.6;
+}
+.content-box {
+  background: var(--oak-surface-2);
+  border-radius: 8px;
+  padding: 12px;
+  white-space: pre-wrap;
+}
 </style>

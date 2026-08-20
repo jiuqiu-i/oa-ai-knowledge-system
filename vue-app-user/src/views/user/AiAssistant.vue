@@ -78,9 +78,6 @@
             </n-space>
           </div>
         </n-space>
-        <n-button quaternary circle>
-          <template #icon><Settings :size="16" /></template>
-        </n-button>
       </div>
 
       <!-- Messages -->
@@ -140,9 +137,6 @@
       <div class="chat-input-area">
         <div class="input-inner">
           <n-space align="center" class="input-box">
-            <n-button quaternary circle>
-              <template #icon><Paperclip :size="18" /></template>
-            </n-button>
             <n-input
               v-model:value="inputText"
               type="textarea"
@@ -178,7 +172,7 @@ import {
   NLayoutSider, NButton, NSpace, NInput
 } from 'naive-ui'
 import {
-  Plus, Bot, Settings, Sparkles, Paperclip, ArrowUp, Square
+  Plus, Bot, Sparkles, ArrowUp, Square
 } from 'lucide-vue-next'
 import { useAiStore } from '@/stores'
 import MarkdownRender from '@/components/MarkdownRender.vue'

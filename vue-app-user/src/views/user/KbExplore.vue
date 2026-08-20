@@ -42,6 +42,7 @@
               :key="doc.id"
               hoverable
               class="result-card"
+              @click="viewDoc(doc)"
             >
               <n-space align="start">
                 <div class="doc-icon">
@@ -118,11 +119,12 @@
           <section class="doc-section">
             <div class="section-bar">
               <h2 class="oak-h2" style="font-size: 20px;">热门知识</h2>
-              <n-button text type="primary">查看全部</n-button>
+              <n-button text type="primary" @click="viewAllHot">查看全部</n-button>
             </div>
-            <n-grid cols="1 s:2 xl:3" :x-gap="16" :y-gap="16" responsive="screen">
+            <n-empty v-if="hotDocs.length === 0" description="暂无热门文档" size="small" />
+            <n-grid v-else cols="1 s:2 xl:3" :x-gap="16" :y-gap="16" responsive="screen">
               <n-grid-item v-for="doc in hotDocs" :key="doc.id">
-                <n-card hoverable class="doc-card">
+                <n-card hoverable class="doc-card" @click="viewDoc(doc)">
                   <n-space align="start" justify="space-between">
                     <div class="doc-icon">
                       <component :is="iconMap[doc.icon] || FileText" :size="20" />
@@ -149,11 +151,12 @@
           <section class="doc-section">
             <div class="section-bar">
               <h2 class="oak-h2" style="font-size: 20px;">最近更新</h2>
-              <n-button text type="primary">查看全部</n-button>
+              <n-button text type="primary" @click="viewAllRecent">查看全部</n-button>
             </div>
-            <n-grid cols="1 s:2 xl:3" :x-gap="16" :y-gap="16" responsive="screen">
+            <n-empty v-if="recentDocs.length === 0" description="暂无文档" size="small" />
+            <n-grid v-else cols="1 s:2 xl:3" :x-gap="16" :y-gap="16" responsive="screen">
               <n-grid-item v-for="doc in recentDocs" :key="doc.id">
-                <n-card hoverable class="doc-card">
+                <n-card hoverable class="doc-card" @click="viewDoc(doc)">
                   <n-space align="start" justify="space-between">
                     <div class="doc-icon">
                       <component :is="iconMap[doc.icon] || FileText" :size="20" />
@@ -179,6 +182,40 @@
         </div>
       </div>
     </section>
+
+    <!-- Doc detail drawer -->
+    <n-drawer v-model:show="docDetailVisible" :width="560" placement="right">
+      <n-drawer-content v-if="activeDoc" :title="activeDoc.title" closable>
+        <div class="detail-inner">
+          <n-space vertical :size="16">
+            <n-space :size="12" wrap>
+              <n-tag round size="small" type="primary">{{ activeDoc.category }}</n-tag>
+              <n-tag v-for="tag in activeDoc.tags" :key="tag" size="small" round>{{ tag }}</n-tag>
+              <n-space align="center" :size="4" class="oak-caption">
+                <Eye :size="12" /> {{ activeDoc.views }} 次阅读
+              </n-space>
+            </n-space>
+            <n-space align="center" :size="10">
+              <n-avatar round size="small" :style="{ background: 'var(--oak-primary)', color: '#fff' }">
+                {{ activeDoc.author.charAt(0) }}
+              </n-avatar>
+              <span class="oak-body">{{ activeDoc.author }}</span>
+              <span class="oak-caption">更新于 {{ activeDoc.updated }}</span>
+            </n-space>
+            <div v-if="activeDoc.summary" class="doc-summary">
+              {{ activeDoc.summary }}
+            </div>
+            <n-divider />
+            <div>
+              <div class="oak-h3 detail-section-title">简介 / 摘要</div>
+              <div class="doc-body">
+                {{ activeDoc.summary || activeDoc.content || '（该文档暂未提供详情内容）' }}
+              </div>
+            </div>
+          </n-space>
+        </div>
+      </n-drawer-content>
+    </n-drawer>
   </main>
 </template>
 
@@ -187,7 +224,7 @@ import { ref, computed, onMounted } from 'vue'
 import type { Component } from 'vue'
 import {
   NInput, NButton, NCard, NGrid, NGridItem, NSpace, NTag,
-  NSelect, NEmpty, NAvatar
+  NSelect, NEmpty, NAvatar, NDrawer, NDrawerContent, NDivider, useMessage
 } from 'naive-ui'
 import type { SelectOption } from 'naive-ui'
 import {
@@ -196,16 +233,19 @@ import {
   Users, HelpCircle, Eye, Clock, User
 } from 'lucide-vue-next'
 import { useKbStore } from '@/stores'
+import { getDocDetail } from '@/api/kb'
 import type { KbDoc } from '@/types'
 
 const kbStore = useKbStore()
+const message = useMessage()
 const searchInput = ref('')
 const showResults = computed(() => kbStore.keyword.trim().length > 0)
 
-// 进入页面时拉取后端文档与分类（后端不可达时保留演示数据）
+// 进入页面时拉取后端文档与分类
 onMounted(() => {
   kbStore.fetchDocs()
   kbStore.fetchCategories()
+  kbStore.fetchHotDocs()
 })
 
 const iconMap: Record<string, Component> = {
@@ -221,10 +261,15 @@ const sortOptions: SelectOption[] = [
 
 const hotTags = ['入职指引', 'API 文档', '报销流程', '产品 Roadmap']
 
-const performSearch = () => {
-  kbStore.search(searchInput.value)
-  // 同时走后端全文检索（后端不可达时仅用前端筛选结果）
-  kbStore.fetchDocs({ keyword: searchInput.value })
+const performSearch = async () => {
+  const kw = searchInput.value.trim()
+  kbStore.search(kw)
+  // 优先走后端全文检索
+  try {
+    await kbStore.fetchDocs({ keyword: kw })
+  } catch {
+    message.warning('后端搜索不可用，已切换本地筛选')
+  }
 }
 
 const useHotTag = (tag: string) => {
@@ -236,11 +281,69 @@ const highlight = (text: string): string => {
   return kbStore.highlight(text, kbStore.keyword)
 }
 
-const hotDocs = computed<KbDoc[]>(() => kbStore.filteredDocs.slice(0, 3))
+const viewAllHot = () => {
+  // 切到最热排序 + 全部分类，并滚动到文档列表
+  kbStore.activeCategory = 'all'
+  kbStore.sortBy = 'hottest'
+  if (!showResults.value) {
+    const el = document.querySelector('.main-area')
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+const viewAllRecent = () => {
+  kbStore.activeCategory = 'all'
+  kbStore.sortBy = 'latest'
+  if (!showResults.value) {
+    const el = document.querySelector('.main-area')
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+const hotDocs = computed<KbDoc[]>(() => {
+  // 有热门就用热门，否则退回到 docs 里按 views 排前 6
+  if (kbStore.hotDocs.length > 0) return kbStore.hotDocs.slice(0, 6)
+  return [...kbStore.filteredDocs].sort((a, b) => {
+    const pa = parseFloat(String(a.views).replace(/[^0-9.]/g, '')) * (String(a.views).includes('k') ? 1000 : 1)
+    const pb = parseFloat(String(b.views).replace(/[^0-9.]/g, '')) * (String(b.views).includes('k') ? 1000 : 1)
+    return pb - pa
+  }).slice(0, 6)
+})
+
 const recentDocs = computed<KbDoc[]>(() => {
   const sorted = [...kbStore.filteredDocs].sort((a, b) => a.updatedOrder - b.updatedOrder)
-  return sorted.slice(0, 3)
+  return sorted.slice(0, 6)
 })
+
+// ---------- 文档详情抽屉 ----------
+const docDetailVisible = ref(false)
+const activeDoc = ref<KbDoc | null>(null)
+
+const viewDoc = async (doc: KbDoc) => {
+  activeDoc.value = doc
+  docDetailVisible.value = true
+  // 尝试加载详情（追加 content）
+  try {
+    const { data } = await getDocDetail(String(doc.id))
+    if (activeDoc.value?.id === doc.id) {
+      activeDoc.value = {
+        ...activeDoc.value,
+        summary: data.summary || activeDoc.value.summary,
+        content: data.content || activeDoc.value.content,
+        views: data.views != null ? (data.views >= 1000 ? `${(data.views / 1000).toFixed(1)}k` : String(data.views)) : activeDoc.value.views
+      } as KbDoc
+    }
+  } catch {
+    // 详情加载失败不阻塞查看
+  }
+}
+
+// 给 KbDoc 增加 content 字段（视图模型中没有，但详情展示需要）
+declare module '@/types' {
+  interface KbDoc {
+    content?: string
+  }
+}
 </script>
 
 <style scoped>
