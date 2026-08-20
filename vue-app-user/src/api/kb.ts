@@ -1,31 +1,60 @@
 import request from './request'
-import type { ApiResponse, KbCategory, KbDoc } from '@/types'
+import type { ApiKbDoc, ApiHotDoc, PaginatedData } from '@/types'
 
-export interface KbSearchParams {
+/**
+ * 知识库接口对接
+ * 后端 Controller 路径为 /knowledge-base，主键为 UUID 字符串
+ */
+
+export interface KbQueryParams {
   keyword?: string
   category?: string
   tag?: string
-  sort?: 'relevance' | 'latest' | 'hottest'
   page?: number
-  size?: number
+  pageSize?: number
 }
 
+export interface CreateKbPayload {
+  title: string
+  category: string
+  tags?: string[]
+  summary?: string
+  content: string
+}
+
+export interface UpdateKbPayload extends Partial<CreateKbPayload> {}
+
+/** 分类列表（后端返回 string[]）*/
 export const getCategories = () => {
-  return request.get<ApiResponse<KbCategory[]>>('/kb/categories')
+  return request.get<string[]>('/knowledge-base/categories')
 }
 
-export const getDocList = (params?: KbSearchParams) => {
-  return request.get<ApiResponse<KbDoc[]>>('/kb/docs', { params })
+/** 热门文档 */
+export const getHotDocs = () => {
+  return request.get<ApiHotDoc[]>('/knowledge-base/hot')
 }
 
-export const searchDocs = (params: KbSearchParams) => {
-  return request.get<ApiResponse<KbDoc[]>>('/kb/docs/search', { params })
+/** 文档列表 / 搜索（后端分页返回 { list, total, page, pageSize }）*/
+export const getDocList = (params?: KbQueryParams) => {
+  return request.get<PaginatedData<ApiKbDoc>>('/knowledge-base', { params })
 }
 
-export const getDocDetail = (id: number) => {
-  return request.get<ApiResponse<KbDoc>>(`/kb/docs/${id}`)
+/** 文档详情（同时自增浏览量）*/
+export const getDocDetail = (id: string) => {
+  return request.get<ApiKbDoc>(`/knowledge-base/${id}`)
 }
 
-export const createDoc = (payload: Partial<KbDoc>) => {
-  return request.post<ApiResponse<KbDoc>>('/kb/docs', payload)
+/** 创建文档（authorId 由后端从当前登录用户注入）*/
+export const createDoc = (payload: CreateKbPayload) => {
+  return request.post<ApiKbDoc>('/knowledge-base', payload)
+}
+
+/** 更新文档 */
+export const updateDoc = (id: string, payload: UpdateKbPayload) => {
+  return request.patch<ApiKbDoc>(`/knowledge-base/${id}`, payload)
+}
+
+/** 删除文档 */
+export const deleteDoc = (id: string) => {
+  return request.delete<{ id: string }>(`/knowledge-base/${id}`)
 }

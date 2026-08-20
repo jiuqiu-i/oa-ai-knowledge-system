@@ -39,6 +39,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
     });
+    console.log(user);
     if (!user) {
       throw new UnauthorizedException('邮箱或密码错误');
     }
@@ -59,6 +60,15 @@ export class AuthService {
       token,
       user: userInfo,
     };
+  }
+
+  /** 管理员专用登录：校验凭据 + 强制要求 ADMIN 角色 */
+  async adminLogin(dto: LoginDto) {
+    const result = await this.login(dto);
+    if (result.user.role !== UserRole.ADMIN) {
+      throw new UnauthorizedException('该账号无管理端登录权限');
+    }
+    return result;
   }
 
   async getProfile(userId: string) {

@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue'
+import { ref, computed, h, onMounted } from 'vue'
 import type { DataTableColumns, FormInst, FormRules, TreeOption, SelectOption, UploadFileInfo } from 'naive-ui'
 import {
-  NGrid,
-  NGridItem,
   NCard,
   NInput,
   NButton,
@@ -41,6 +39,12 @@ import { useKbStore } from '@/stores'
 const message = useMessage()
 const dialog = useDialog()
 const kbStore = useKbStore()
+
+// 后端可达时用真实数据覆盖演示数据
+onMounted(() => {
+  kbStore.fetchDocuments()
+  kbStore.fetchCategories()
+})
 
 const searchKeyword = ref('')
 const batchAction = ref<string | null>(null)
@@ -268,42 +272,38 @@ function handleBatchAction(value: string) {
       </n-space>
     </n-card>
 
-    <!-- Two-column layout -->
-    <n-grid :cols="4" :x-gap="16" :y-gap="16" class="content-grid">
-      <n-grid-item span="4 s:1">
-        <n-card title="文档分类" class="category-card">
-          <template #header-extra>
-            <n-button quaternary size="small" @click="createCategory">
-              <template #icon>
-                <Plus :size="16" />
-              </template>
-            </n-button>
-          </template>
-          <n-tree
-            block-line
-            :data="treeData"
-            default-expand-all
-            selectable
-          />
-        </n-card>
-      </n-grid-item>
+    <!-- Two-column layout: fixed 260px category sidebar + flex-1 table -->
+    <div class="content-wrap">
+      <n-card title="文档分类" class="category-card" :bordered="false">
+        <template #header-extra>
+          <n-button quaternary size="small" @click="createCategory">
+            <template #icon>
+              <Plus :size="16" />
+            </template>
+          </n-button>
+        </template>
+        <n-tree
+          block-line
+          :data="treeData"
+          default-expand-all
+          selectable
+        />
+      </n-card>
 
-      <n-grid-item span="4 s:3">
-        <n-card class="table-card">
-          <n-data-table
-            :columns="columns"
-            :data="filteredDocuments"
-            :bordered="false"
-            :single-line="false"
-            size="small"
-          />
-          <div class="pagination-bar">
-            <span class="pagination-text">共 124 条，每页 10 条</span>
-            <n-pagination :page="1" :page-size="10" :item-count="124" />
-          </div>
-        </n-card>
-      </n-grid-item>
-    </n-grid>
+      <n-card class="table-card" :bordered="false">
+        <n-data-table
+          :columns="columns"
+          :data="filteredDocuments"
+          :bordered="false"
+          :single-line="false"
+          size="small"
+        />
+        <div class="pagination-bar">
+          <span class="pagination-text">共 124 条，每页 10 条</span>
+          <n-pagination :page="1" :page-size="10" :item-count="124" />
+        </div>
+      </n-card>
+    </div>
 
     <!-- Upload/Edit modal -->
     <n-modal v-model:show="showDocModal" :title="modalMode === 'edit' ? '编辑文档' : '上传/新增文档'" preset="card" style="width: 560px">
@@ -350,23 +350,46 @@ function handleBatchAction(value: string) {
 .kb-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
 .toolbar-card {
   margin-bottom: 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
 }
 
-.content-grid {
-  margin-top: 0;
+.content-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  min-height: calc(100vh - 220px);
 }
 
 .category-card {
-  min-height: calc(100vh - 220px);
+  width: 260px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
 }
 
 .table-card {
-  min-height: calc(100vh - 220px);
+  flex: 1;
+  min-width: 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.table-card :deep(.n-card__content) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-card :deep(.n-data-table) {
+  flex: 1;
 }
 
 .pagination-bar {
@@ -381,5 +404,15 @@ function handleBatchAction(value: string) {
 .pagination-text {
   font-size: 13px;
   color: #9F968A;
+}
+
+@media (max-width: 768px) {
+  .content-wrap {
+    flex-direction: column;
+  }
+
+  .category-card {
+    width: 100%;
+  }
 }
 </style>

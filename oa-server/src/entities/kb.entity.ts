@@ -6,10 +6,22 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from './user.entity';
 
+/**
+ * 全文检索索引：title + content，使用 ngram 解析器以支持中文分词
+ * 注意：synchronize 不会自动创建带 parser 的 FULLTEXT 索引，
+ * 生产部署需通过迁移脚本执行：
+ *   CREATE FULLTEXT INDEX idx_kb_fulltext ON knowledge_base (title, content) WITH PARSER ngram;
+ * 检索逻辑在 service 中提供 LIKE 降级，索引缺失不影响可用性。
+ */
 @Entity('knowledge_base')
+@Index('idx_kb_fulltext', ['title', 'content'], { fulltext: true, parser: 'ngram' })
+@Index('idx_kb_category', ['category'])
+@Index('idx_kb_views', ['views'])
+@Index('idx_kb_author', ['authorId'])
 export class KnowledgeBase {
   @PrimaryGeneratedColumn('uuid')
   id: string;

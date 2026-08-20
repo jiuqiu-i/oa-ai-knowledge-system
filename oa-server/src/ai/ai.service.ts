@@ -12,6 +12,7 @@ export class AiService {
   private readonly logger = new Logger(AiService.name);
   private readonly openaiApiKey: string;
   private readonly openaiModel: string;
+  private readonly openaiBaseUrl: string;
 
   constructor(
     @InjectRepository(AiConversation)
@@ -20,6 +21,7 @@ export class AiService {
   ) {
     this.openaiApiKey = this.configService.get<string>('OPENAI_API_KEY') || '';
     this.openaiModel = this.configService.get<string>('OPENAI_MODEL') || 'gpt-3.5-turbo';
+    this.openaiBaseUrl = this.configService.get<string>('OPENAI_BASE_URL') || '';
   }
 
   async getConversations(userId: string) {
@@ -135,6 +137,7 @@ export class AiService {
                 openAIApiKey: this.openaiApiKey,
                 modelName: this.openaiModel,
                 streaming: true,
+                configuration: this.openaiBaseUrl ? { baseURL: this.openaiBaseUrl } : undefined,
               });
               const stream = await model.stream(this.toLangChainMessages([systemPrompt, ...messages]));
               for await (const chunk of stream) {
@@ -174,6 +177,7 @@ export class AiService {
     const model: any = new ChatOpenAI({
       openAIApiKey: this.openaiApiKey,
       modelName: this.openaiModel,
+      configuration: this.openaiBaseUrl ? { baseURL: this.openaiBaseUrl } : undefined,
     });
     const result = await model.invoke(this.toLangChainMessages(messages));
     return (result.content as string) || '';

@@ -26,6 +26,13 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Public()
+  @Post('admin-login')
+  @ApiOperation({ summary: '管理员登录（管理端专用，校验 ADMIN 角色）' })
+  adminLogin(@Body() dto: LoginDto) {
+    return this.authService.adminLogin(dto);
+  }
+
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

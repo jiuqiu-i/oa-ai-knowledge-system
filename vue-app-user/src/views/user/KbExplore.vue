@@ -183,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { Component } from 'vue'
 import {
   NInput, NButton, NCard, NGrid, NGridItem, NSpace, NTag,
@@ -202,6 +202,12 @@ const kbStore = useKbStore()
 const searchInput = ref('')
 const showResults = computed(() => kbStore.keyword.trim().length > 0)
 
+// 进入页面时拉取后端文档与分类（后端不可达时保留演示数据）
+onMounted(() => {
+  kbStore.fetchDocs()
+  kbStore.fetchCategories()
+})
+
 const iconMap: Record<string, Component> = {
   FileText, Code, Rocket, ShieldCheck, Banknote, Phone,
   FolderOpen, Box, Code2, TrendingUp, Users, HelpCircle
@@ -217,6 +223,8 @@ const hotTags = ['入职指引', 'API 文档', '报销流程', '产品 Roadmap']
 
 const performSearch = () => {
   kbStore.search(searchInput.value)
+  // 同时走后端全文检索（后端不可达时仅用前端筛选结果）
+  kbStore.fetchDocs({ keyword: searchInput.value })
 }
 
 const useHotTag = (tag: string) => {

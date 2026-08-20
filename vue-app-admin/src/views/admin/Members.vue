@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue'
+import { ref, computed, h, onMounted } from 'vue'
 import type { DataTableColumns, FormInst, FormRules, SelectOption } from 'naive-ui'
 import {
   NCard,
@@ -70,6 +70,12 @@ const initialMembers: User[] = [
   { id: 7, name: '周杰', email: 'zhoujie@oakoa.com', department: '财务部', role: 'visitor', status: 'pending', joinedAt: '2026-08-10' }
 ]
 memberStore.setMembers(initialMembers)
+
+// 后端可达时用真实数据覆盖演示数据
+onMounted(() => {
+  memberStore.fetchMembers()
+  memberStore.fetchDepartments()
+})
 
 const filteredMembers = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()

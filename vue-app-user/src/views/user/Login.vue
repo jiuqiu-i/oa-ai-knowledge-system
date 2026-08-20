@@ -39,7 +39,7 @@
           </div>
 
           <n-form ref="formRef" :model="form" :rules="rules" label-placement="top">
-            <n-form-item label="邮箱 / 工号" path="email">
+            <n-form-item label="邮箱" path="email">
               <n-input v-model:value="form.email" placeholder="name@company.com">
                 <template #prefix><Mail :size="16" /></template>
               </n-input>
@@ -134,11 +134,15 @@ const features = [
 const goHome = () => router.push('/')
 
 const handleLogin = () => {
-  formRef.value?.validate((errors?: FormValidationError[]) => {
+  formRef.value?.validate(async (errors?: FormValidationError[]) => {
     if (errors) return
-    userStore.login({ name: form.value.email.split('@')[0] || '用户' })
-    message.success('登录成功')
-    router.push('/home')
+    const ok = await userStore.login({ email: form.value.email, password: form.value.password })
+    if (ok) {
+      message.success('登录成功')
+      router.push('/home')
+    } else {
+      message.error('登录失败，请检查邮箱或密码')
+    }
   })
 }
 </script>

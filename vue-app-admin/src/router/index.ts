@@ -8,6 +8,12 @@ const routes: RouteRecordRaw[] = [
     redirect: '/admin/dashboard'
   },
   {
+    path: '/login',
+    name: 'AdminLogin',
+    component: () => import('@/views/admin/Login.vue'),
+    meta: { title: '登录', public: true }
+  },
+  {
     path: '/admin',
     component: AdminLayout,
     children: [
@@ -48,6 +54,18 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
+})
+
+// 登录守卫：未登录时跳转到 /login，已登录时禁止访问 /login
+router.beforeEach((to) => {
+  const token = localStorage.getItem('oa_admin_token')
+  if (!to.meta.public && !token) {
+    return { name: 'AdminLogin', query: { redirect: to.fullPath } }
+  }
+  if (to.name === 'AdminLogin' && token) {
+    return { name: 'AdminDashboard' }
+  }
+  return true
 })
 
 router.afterEach((to) => {

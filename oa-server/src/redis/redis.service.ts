@@ -45,6 +45,46 @@ export class RedisService implements OnModuleDestroy {
     await this.client.del(key);
   }
 
+  async ping(): Promise<string> {
+    return this.client.ping();
+  }
+
+  /**
+   * Cache-Aside 模式封装：先读缓存，未命中则执行 loader 取数并回填；
+   * 命中时直接返回缓存，避免穿透到数据库。loader 抛错时不上写脏缓存。
+   */
+  async getOrSet<T>(
+    key: string,
+    ttlSeconds: number,
+    loader: () => Promise<T>,
+  ): Promise<T> {
+    const cached = await this.get(key);
+    if (cached !== null && cached !== undefined) {
+      try {
+        return JSON.parse(cached) as T;
+      } catch {
+        // 缓存值损坏，回退到 loader 重建
+        this.logger.warn(`缓存值解析失败，重建 key=${key}`);
+      }
+    }
+    const fresh = await loader();
+    // 不缓存 null/undefined，避免缓存穿透误判
+    if (fresh !== null && fresh !== undefined) {
+      await this.set(key, JSON.stringify(fresh), ttlSeconds);
+    }
+    return fresh;
+  }
+
+  /**
+   * 失效自动更新：删除缓存 key（写操作后调用，保证后续读触发重建）
+   */
+  async invalidate(key: string | string[]): Promise<void> {
+    const keys = Array.isArray(key) ? key : [key];
+    if (keys.length === 0) return;
+    await this.client.del(keys);
+    this.logger.log(`缓存失效: ${keys.join(', ')}`);
+  }
+
   async blacklistToken(token: string, ttlSeconds: number): Promise<void> {
     await this.set(`blacklist:${token}`, '1', ttlSeconds);
   }

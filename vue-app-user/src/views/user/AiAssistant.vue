@@ -15,42 +15,49 @@
           新建对话
         </n-button>
         <div class="session-list">
-          <p class="group-title">今天</p>
-          <n-button
-            v-for="session in todaySessions"
-            :key="session.id"
-            quaternary
-            block
-            :type="session.active ? 'primary' : 'default'"
-            class="session-btn"
-            @click="aiStore.selectSession(session.id)"
-          >
-            {{ session.title }}
-          </n-button>
-          <p class="group-title">昨天</p>
-          <n-button
-            v-for="session in yesterdaySessions"
-            :key="session.id"
-            quaternary
-            block
-            :type="session.active ? 'primary' : 'default'"
-            class="session-btn"
-            @click="aiStore.selectSession(session.id)"
-          >
-            {{ session.title }}
-          </n-button>
-          <p class="group-title">更早</p>
-          <n-button
-            v-for="session in earlierSessions"
-            :key="session.id"
-            quaternary
-            block
-            :type="session.active ? 'primary' : 'default'"
-            class="session-btn"
-            @click="aiStore.selectSession(session.id)"
-          >
-            {{ session.title }}
-          </n-button>
+          <template v-if="todaySessions.length">
+            <p class="group-title">今天</p>
+            <n-button
+              v-for="session in todaySessions"
+              :key="session.id"
+              quaternary
+              block
+              :type="session.active ? 'primary' : 'default'"
+              class="session-btn"
+              @click="aiStore.selectSession(session.id)"
+            >
+              {{ session.title }}
+            </n-button>
+          </template>
+          <template v-if="yesterdaySessions.length">
+            <p class="group-title">昨天</p>
+            <n-button
+              v-for="session in yesterdaySessions"
+              :key="session.id"
+              quaternary
+              block
+              :type="session.active ? 'primary' : 'default'"
+              class="session-btn"
+              @click="aiStore.selectSession(session.id)"
+            >
+              {{ session.title }}
+            </n-button>
+          </template>
+          <template v-if="earlierSessions.length">
+            <p class="group-title">更早</p>
+            <n-button
+              v-for="session in earlierSessions"
+              :key="session.id"
+              quaternary
+              block
+              :type="session.active ? 'primary' : 'default'"
+              class="session-btn"
+              @click="aiStore.selectSession(session.id)"
+            >
+              {{ session.title }}
+            </n-button>
+          </template>
+          <p v-if="!aiStore.sessions.length" class="group-title" style="opacity:.6">暂无历史会话</p>
         </div>
       </div>
     </n-layout-sider>
@@ -111,21 +118,14 @@
                 <Bot :size="16" />
               </div>
               <div class="ai-bubble">
-                <TypewriterText
-                  v-if="msg.typing"
-                  :text="msg.content"
-                  :speed="35"
-                  tag="p"
-                  class="msg-text"
-                  @done="onTypingDone(msg)"
-                />
-                <p v-else class="msg-text">{{ msg.content }}</p>
+                <!-- Agent 回复：Markdown 实时渲染，流式时末尾显示闪烁光标 -->
+                <MarkdownRender :content="msg.content" :streaming="msg.streaming" />
               </div>
             </template>
           </div>
 
-          <!-- Typing indicator -->
-          <div v-if="aiStore.isTyping" class="message-row assistant">
+          <!-- Typing indicator：仅在等待首个 token 时显示（流式已产出 token 后由 streaming 消息自带光标） -->
+          <div v-if="aiStore.isTyping && !hasStreamingMessage" class="message-row assistant">
             <div class="ai-avatar"><Bot :size="16" /></div>
             <div class="ai-bubble">
               <div class="typing-dots">
@@ -147,11 +147,21 @@
               v-model:value="inputText"
               type="textarea"
               :autosize="{ minRows: 1, maxRows: 4 }"
-              placeholder="输入消息..."
+              :placeholder="aiStore.isTyping ? 'AI 正在回复...' : '输入消息...'"
+              :disabled="aiStore.isTyping"
               class="chat-input"
               @keydown.enter.prevent="sendMessage"
             />
-            <n-button circle type="primary" :disabled="!inputText.trim()" @click="sendMessage">
+            <n-button
+              v-if="aiStore.isTyping"
+              circle
+              type="error"
+              title="停止生成"
+              @click="aiStore.stopStreaming"
+            >
+              <template #icon><Square :size="14" /></template>
+            </n-button>
+            <n-button v-else circle type="primary" :disabled="!inputText.trim()" @click="sendMessage">
               <template #icon><ArrowUp :size="16" /></template>
             </n-button>
           </n-space>
@@ -163,24 +173,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch, computed } from 'vue'
+import { ref, nextTick, watch, computed, onMounted } from 'vue'
 import {
   NLayoutSider, NButton, NSpace, NInput
 } from 'naive-ui'
 import {
-  Plus, Bot, Settings, Sparkles, Paperclip, ArrowUp
+  Plus, Bot, Settings, Sparkles, Paperclip, ArrowUp, Square
 } from 'lucide-vue-next'
 import { useAiStore } from '@/stores'
-import TypewriterText from '@/components/TypewriterText.vue'
-import type { AiMessage, AiSession } from '@/types'
+import MarkdownRender from '@/components/MarkdownRender.vue'
+import type { AiSession } from '@/types'
 
 const aiStore = useAiStore()
 const inputText = ref('')
 const scrollRef = ref<HTMLElement | null>(null)
 
-const todaySessions = computed<AiSession[]>(() => aiStore.sessions.slice(0, 3))
-const yesterdaySessions = computed<AiSession[]>(() => aiStore.sessions.slice(3, 5))
-const earlierSessions = computed<AiSession[]>(() => aiStore.sessions.slice(5))
+// 会话列表按 updatedAt/createdAt 分组（今天/昨天/更早）
+const toDateKey = (iso?: string) => {
+  if (!iso) return 'earlier'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return 'earlier'
+  const today = new Date()
+  const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  const yesterday0 = today0 - 86400000
+  const t = d.getTime()
+  if (t >= today0) return 'today'
+  if (t >= yesterday0) return 'yesterday'
+  return 'earlier'
+}
+
+const todaySessions = computed<AiSession[]>(() =>
+  aiStore.sessions.filter((s) => toDateKey(s.updatedAt || s.createdAt) === 'today'),
+)
+const yesterdaySessions = computed<AiSession[]>(() =>
+  aiStore.sessions.filter((s) => toDateKey(s.updatedAt || s.createdAt) === 'yesterday'),
+)
+const earlierSessions = computed<AiSession[]>(() =>
+  aiStore.sessions.filter((s) => toDateKey(s.updatedAt || s.createdAt) === 'earlier'),
+)
+
+// 是否存在流式进行中的消息（决定 typing-dots 是否显示）
+const hasStreamingMessage = computed(() => aiStore.messages.some((m) => m.streaming))
 
 const quickPrompts = ['帮我写一份周报', '查询公司报销流程', '总结这份文档']
 
@@ -194,20 +227,25 @@ const scrollToBottom = () => {
 
 watch(() => aiStore.messages.length, scrollToBottom, { immediate: true })
 watch(() => aiStore.isTyping, scrollToBottom)
+// 流式 token 累积时持续滚到底
+watch(
+  () => aiStore.messages.map((m) => m.content).join(''),
+  () => scrollToBottom(),
+)
+
+onMounted(() => {
+  aiStore.loadSessions()
+})
 
 const sendMessage = () => {
   const text = inputText.value.trim()
-  if (!text) return
-  aiStore.sendMessage(text)
+  if (!text || aiStore.isTyping) return
   inputText.value = ''
+  aiStore.sendMessage(text)
 }
 
 const sendQuick = (prompt: string) => {
   aiStore.sendMessage(prompt)
-}
-
-const onTypingDone = (msg: AiMessage) => {
-  msg.typing = false
 }
 </script>
 

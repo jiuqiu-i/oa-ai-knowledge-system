@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue'
+import { ref, computed, h, onMounted } from 'vue'
 import type { Component } from 'vue'
 import { useRouter } from 'vue-router'
 import type { DataTableColumns, SelectOption } from 'naive-ui'
@@ -14,9 +14,7 @@ import {
   NTag,
   NDataTable,
   NAvatar,
-  NThing,
   NText,
-  NEllipsis,
   useMessage
 } from 'naive-ui'
 import {
@@ -30,19 +28,22 @@ import {
   CheckCircle,
   Bell,
   ChevronRight,
-  BarChart3,
-  PieChart,
-  Megaphone,
-  LogIn,
   Check,
   X
 } from 'lucide-vue-next'
 import type { EChartsOption } from 'echarts'
 import EChart from '@/components/EChart.vue'
 import type { Announcement, RecentLogin } from '@/types'
+import { useDashboardStore } from '@/stores'
 
 const router = useRouter()
 const message = useMessage()
+const dashboardStore = useDashboardStore()
+
+// 进入页面拉取真实仪表盘数据（后端不可达时保留演示兜底）
+onMounted(() => {
+  dashboardStore.fetchAll()
+})
 
 const period = ref<string>('7')
 const periodOptions: SelectOption[] = [
@@ -77,7 +78,7 @@ const activityOption = computed<EChartsOption>(() => ({
   },
   xAxis: {
     type: 'category',
-    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+    data: dashboardStore.trends.map((t) => t.date),
     axisLine: { show: false },
     axisTick: { show: false },
     axisLabel: { color: '#6E665B', fontSize: 12 }
@@ -93,7 +94,7 @@ const activityOption = computed<EChartsOption>(() => ({
     {
       name: '活跃用户数',
       type: 'line',
-      data: [720, 810, 795, 860, 892, 650, 680],
+      data: dashboardStore.trends.map((t) => t.newUsers),
       smooth: true,
       symbolSize: 8,
       lineStyle: { color: '#E58A2E', width: 3 },
@@ -143,7 +144,7 @@ const deptOption = computed<EChartsOption>(() => ({
   },
   xAxis: {
     type: 'category',
-    data: ['技术部', '产品部', '人事部', '财务部', '市场部', '运营部'],
+    data: dashboardStore.deptContributions.map((d) => d.dept),
     axisLine: { show: false },
     axisTick: { show: false },
     axisLabel: { color: '#6E665B', fontSize: 12 }
@@ -159,7 +160,7 @@ const deptOption = computed<EChartsOption>(() => ({
     {
       name: '文档贡献数',
       type: 'bar',
-      data: [420, 310, 180, 150, 260, 210],
+      data: dashboardStore.deptContributions.map((d) => d.count),
       barWidth: 22,
       itemStyle: {
         borderRadius: [5, 5, 0, 0],
@@ -182,12 +183,12 @@ interface MetricCard {
   trendType: string
 }
 
-const metricCards: MetricCard[] = [
-  { label: '总员工数', value: 1248, trend: '+12', trendText: '较上月', icon: Users, type: 'primary', trendType: 'success' },
-  { label: '今日活跃', value: 892, trend: '+5.4%', trendText: '较昨日', icon: Activity, type: 'info', trendType: 'success' },
-  { label: '待处理审批', value: 34, trend: '8 项加急', trendText: '需关注', icon: ClipboardList, type: 'warning', trendType: 'error' },
-  { label: '知识库文档数', value: 3621, trend: '+128', trendText: '本周新增', icon: BookOpen, type: 'success', trendType: 'success' }
-]
+const metricCards = computed<MetricCard[]>(() => [
+  { label: '总员工数', value: dashboardStore.stats.totalUsers, trend: '总数', trendText: '员工总数', icon: Users, type: 'primary', trendType: 'success' },
+  { label: '今日活跃', value: dashboardStore.stats.activeUsers, trend: '活跃', trendText: '活跃用户', icon: Activity, type: 'info', trendType: 'success' },
+  { label: '待处理审批', value: dashboardStore.stats.pendingApprovals, trend: '待审批', trendText: '需关注', icon: ClipboardList, type: 'warning', trendType: 'error' },
+  { label: '知识库文档数', value: dashboardStore.stats.totalDocs, trend: '文档', trendText: '文档总数', icon: BookOpen, type: 'success', trendType: 'success' }
+])
 
 const typeIconMap: Record<string, Component> = {
   info: Info,
@@ -361,12 +362,7 @@ function exportChart() {
       <n-grid-item span="3 l:2">
         <n-card class="chart-card" :bordered="false" segmented>
           <template #header>
-            <n-space align="center" :size="8">
-              <div class="section-icon primary">
-                <BarChart3 :size="16" />
-              </div>
-              <span class="section-title">系统活跃度趋势</span>
-            </n-space>
+            <span class="section-title">系统活跃度趋势</span>
           </template>
           <template #header-extra>
             <n-select v-model:value="period" :options="periodOptions" size="small" style="width: 100px" />
@@ -376,12 +372,7 @@ function exportChart() {
 
         <n-card class="chart-card" :bordered="false" segmented>
           <template #header>
-            <n-space align="center" :size="8">
-              <div class="section-icon info">
-                <PieChart :size="16" />
-              </div>
-              <span class="section-title">各部门知识贡献</span>
-            </n-space>
+            <span class="section-title">各部门知识贡献</span>
           </template>
           <template #header-extra>
             <n-button quaternary type="primary" size="small" @click="exportChart">
@@ -395,70 +386,58 @@ function exportChart() {
       <n-grid-item span="3 l:1">
         <n-card class="side-card" :bordered="false" segmented>
           <template #header>
-            <n-space align="center" :size="8">
-              <div class="section-icon warning">
-                <Megaphone :size="16" />
-              </div>
-              <span class="section-title">系统公告</span>
-            </n-space>
+            <span class="section-title">系统公告</span>
           </template>
           <template #header-extra>
             <n-button text type="primary" size="small">全部</n-button>
           </template>
           <div class="announcement-list">
-            <n-thing
+            <div
               v-for="(item, index) in announcements"
               :key="index"
               class="announcement-item"
             >
-              <template #avatar>
-                <div class="announcement-icon" :style="{ background: typeColorMap[item.type].bg, color: typeColorMap[item.type].color }">
+              <div class="announcement-top">
+                <span
+                  class="announcement-icon"
+                  :style="{ background: typeColorMap[item.type].bg, color: typeColorMap[item.type].color }"
+                >
                   <component :is="typeIconMap[item.type]" :size="12" />
-                </div>
-              </template>
-              <template #header>
-                <n-ellipsis :line-clamp="2" class="announcement-title">{{ item.title }}</n-ellipsis>
-              </template>
-              <template #description>
-                <n-text class="announcement-date">{{ item.date }}</n-text>
-              </template>
-            </n-thing>
+                </span>
+                <span class="announcement-date">{{ item.date }}</span>
+              </div>
+              <p class="announcement-title">{{ item.title }}</p>
+            </div>
           </div>
         </n-card>
 
         <n-card class="side-card" :bordered="false" segmented>
           <template #header>
-            <n-space align="center" :size="8">
-              <div class="section-icon success">
-                <LogIn :size="16" />
-              </div>
-              <span class="section-title">最近登录</span>
-            </n-space>
+            <span class="section-title">最近登录</span>
           </template>
           <template #header-extra>
             <n-button text type="primary" size="small">查看</n-button>
           </template>
           <div class="login-list">
-            <n-thing
+            <div
               v-for="(item, index) in recentLogins"
               :key="index"
               class="login-item"
             >
-              <template #avatar>
-                <n-avatar round :size="38" :style="{ background: item.color, color: '#fff', fontSize: '13px', fontWeight: 600 }">
+              <div class="login-left">
+                <span
+                  class="login-avatar"
+                  :style="{ background: item.color }"
+                >
                   {{ item.name.charAt(0) }}
-                </n-avatar>
-              </template>
-              <template #header>
-                <span class="login-name">{{ item.name }}</span>
-              </template>
-              <template #description>
-                <n-text class="login-dept">{{ item.dept }}</n-text>
-              </template>
-              <template #action>
-                <n-text class="login-time">{{ item.time }}</n-text>
-              </template>
-            </n-thing>
+                </span>
+                <div class="login-info">
+                  <p class="login-name">{{ item.name }}</p>
+                  <p class="login-dept">{{ item.dept }}</p>
+                </div>
+              </div>
+              <span class="login-time">{{ item.time }}</span>
+            </div>
           </div>
         </n-card>
       </n-grid-item>
@@ -467,12 +446,7 @@ function exportChart() {
     <!-- Pending approvals table -->
     <n-card class="approval-card" :bordered="false" segmented>
       <template #header>
-        <n-space align="center" :size="8">
-          <div class="section-icon warning">
-            <ClipboardList :size="16" />
-          </div>
-          <span class="section-title">待处理审批</span>
-        </n-space>
+        <span class="section-title">待处理审批</span>
       </template>
       <template #header-extra>
         <n-button text type="primary" size="small" @click="viewAllApprovals">
@@ -504,13 +478,7 @@ function exportChart() {
 
 .metric-card {
   border-radius: 12px;
-  transition: box-shadow 0.25s ease, transform 0.2s ease;
   box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
-}
-
-.metric-card:hover {
-  box-shadow: 0 4px 12px rgba(42, 38, 31, 0.08), 0 8px 24px rgba(42, 38, 31, 0.06);
-  transform: translateY(-2px);
 }
 
 .metric-label {
@@ -556,12 +524,11 @@ function exportChart() {
 }
 
 .metric-trend {
-  padding-top: 4px;
-  border-top: 1px solid #F0EBE3;
+  margin-top: 16px;
 }
 
 .trend-text {
-  font-size: 12px;
+  font-size: 13px;
   color: #9F968A;
 }
 
@@ -569,35 +536,6 @@ function exportChart() {
   font-size: 15px;
   font-weight: 600;
   color: #2A261F;
-}
-
-.section-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.section-icon.primary {
-  background: rgba(229, 138, 46, 0.12);
-  color: #E58A2E;
-}
-
-.section-icon.info {
-  background: rgba(46, 144, 250, 0.12);
-  color: #2E90FA;
-}
-
-.section-icon.warning {
-  background: rgba(245, 184, 0, 0.12);
-  color: #F5B800;
-}
-
-.section-icon.success {
-  background: rgba(52, 168, 83, 0.12);
-  color: #34A853;
 }
 
 .chart-card {
@@ -628,9 +566,9 @@ function exportChart() {
 
 .announcement-item {
   padding: 12px;
-  background: #F9F7F2;
+  background: #F7F4EF;
   border-radius: 8px;
-  border: 1px solid #EDE8DF;
+  border: 1px solid #E8E2D9;
   transition: background 0.2s ease;
 }
 
@@ -638,9 +576,15 @@ function exportChart() {
   background: #F5F1EB;
 }
 
+.announcement-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .announcement-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -648,41 +592,65 @@ function exportChart() {
   flex-shrink: 0;
 }
 
+.announcement-date {
+  font-size: 12px;
+  font-weight: 500;
+  color: #9F968A;
+}
+
 .announcement-title {
-  font-size: 13px;
+  margin: 8px 0 0 0;
+  font-size: 14px;
   font-weight: 500;
   color: #2A261F;
   line-height: 1.5;
 }
 
-.announcement-date {
-  font-size: 12px;
-  color: #9F968A;
-}
-
 .login-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .login-item {
-  padding: 8px 10px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.login-item:hover {
-  background: #F9F7F2;
+.login-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.login-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .login-name {
+  margin: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #2A261F;
 }
 
 .login-dept {
+  margin: 0;
   font-size: 12px;
   color: #9F968A;
 }

@@ -32,28 +32,38 @@ export class SeedService {
 
   private async seedAdmin(): Promise<User> {
     const email = 'admin@oa.com';
+    const rawPassword = '123456';
     let admin = await this.userRepository.findOne({ where: { email } });
 
     if (!admin) {
       admin = this.userRepository.create({
         name: '系统管理员',
         email,
-        password: await bcrypt.hash('admin123', 10),
+        password: await bcrypt.hash(rawPassword, 10),
         role: UserRole.ADMIN,
         dept: '管理部',
         avatarColor: '#E58A2E',
         status: UserStatus.ACTIVE,
       });
       await this.userRepository.save(admin);
-      this.logger.log('管理员账号已创建: admin@oa.com / admin123');
+      this.logger.log(`管理员账号已创建: ${email} / ${rawPassword}`);
     } else {
-      this.logger.log('管理员账号已存在');
+      // 用户存在也强制重置密码，确保开发者每次启动都可用同一凭据登录
+      admin.password = await bcrypt.hash(rawPassword, 10);
+      admin.role = UserRole.ADMIN;
+      admin.status = UserStatus.ACTIVE;
+      admin.name = '系统管理员';
+      admin.dept = '管理部';
+      admin.avatarColor = '#E58A2E';
+      await this.userRepository.save(admin);
+      this.logger.log(`管理员账号已重置密码: ${email} / ${rawPassword}`);
     }
 
     return admin;
   }
 
   private async seedUsers(): Promise<User[]> {
+    const rawPassword = '123456';
     const userData = [
       { name: '李思远', email: 'lisiyuan@oa.com', dept: '技术部', avatarColor: '#E58A2E' },
       { name: '王嘉怡', email: 'wangjiayi@oa.com', dept: '人事部', avatarColor: '#2E90FA' },
@@ -69,16 +79,25 @@ export class SeedService {
       if (!user) {
         user = this.userRepository.create({
           ...data,
-          password: await bcrypt.hash('123456', 10),
+          password: await bcrypt.hash(rawPassword, 10),
           role: UserRole.USER,
           status: UserStatus.ACTIVE,
         });
+        await this.userRepository.save(user);
+      } else {
+        // 存在也强制重置密码、角色、状态，保证每次启动可用一致密码
+        user.name = data.name;
+        user.dept = data.dept;
+        user.avatarColor = data.avatarColor;
+        user.password = await bcrypt.hash(rawPassword, 10);
+        user.role = UserRole.USER;
+        user.status = UserStatus.ACTIVE;
         await this.userRepository.save(user);
       }
       users.push(user);
     }
 
-    this.logger.log(`已确保 ${users.length} 个普通用户存在`);
+    this.logger.log(`已确保 ${users.length} 个普通用户存在，默认密码：${rawPassword}`);
     return users;
   }
 

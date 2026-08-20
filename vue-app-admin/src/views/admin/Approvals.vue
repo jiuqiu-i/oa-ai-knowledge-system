@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, h } from 'vue'
+import { ref, computed, h, onMounted } from 'vue'
 import type { Component } from 'vue'
 import type { DataTableColumns, SelectOption } from 'naive-ui'
 import {
   NGrid,
   NGridItem,
   NCard,
-  NStatistic,
   NInput,
   NSelect,
   NButton,
@@ -41,6 +40,11 @@ import { useApprovalStore } from '@/stores'
 
 const message = useMessage()
 const approvalStore = useApprovalStore()
+
+// 后端可达时用真实数据覆盖演示数据
+onMounted(() => {
+  approvalStore.fetchApprovals()
+})
 
 const searchKeyword = ref('')
 const typeFilter = ref('')
@@ -164,7 +168,7 @@ const columns: DataTableColumns<Approval> = [
 const showDrawer = ref(false)
 const currentDetail = ref<Approval | null>(null)
 
-function openDrawer(id: number) {
+function openDrawer(id: number | string) {
   const item = approvalStore.getApprovalById(id)
   if (!item) return
   currentDetail.value = item
@@ -176,19 +180,19 @@ function closeDrawer() {
   currentDetail.value = null
 }
 
-async function approveItem(id: number) {
+async function approveItem(id: number | string) {
   const item = approvalStore.getApprovalById(id)
   await approvalStore.approveItem(id)
   message.success(`「${item?.title ?? ''}」已通过`)
 }
 
-async function rejectItem(id: number) {
+async function rejectItem(id: number | string) {
   const item = approvalStore.getApprovalById(id)
   await approvalStore.rejectItem(id)
   message.error(`「${item?.title ?? ''}」已驳回`)
 }
 
-async function deleteItem(id: number) {
+async function deleteItem(id: number | string) {
   const item = approvalStore.getApprovalById(id)
   await approvalStore.deleteItem(id)
   message.info(`已删除「${item?.title ?? ''}」`)
@@ -205,20 +209,27 @@ function createApproval() {
     <!-- Stats cards -->
     <n-grid :cols="4" :x-gap="16" :y-gap="16" responsive="screen" class="stats-grid">
       <n-grid-item v-for="(stat, index) in stats" :key="index" span="4 s:2 l:1">
-        <n-card>
-          <n-space align="center" justify="space-between">
-            <n-statistic :label="stat.label" :value="stat.value" />
-            <div class="stat-icon" :style="{ background: stat.color + '1A', color: stat.color }">
-              <component :is="stat.icon" :size="18" />
-            </div>
-          </n-space>
+        <n-card class="stat-card" :bordered="false">
+          <div class="stat-top">
+            <span class="stat-label">{{ stat.label }}</span>
+            <span
+              class="stat-icon"
+              :style="{ background: stat.color + '1F', color: stat.color }"
+            >
+              <component :is="stat.icon" :size="16" />
+            </span>
+          </div>
+          <div class="stat-value">{{ stat.value }}</div>
           <div class="stat-trend">
             <component
               :is="stat.trendType === 'up' ? TrendingUp : stat.trendType === 'down' ? TrendingDown : Minus"
               :size="12"
               :style="{ color: stat.trendType === 'up' ? '#34A853' : stat.trendType === 'down' ? '#EA4335' : '#9F968A' }"
             />
-            <span :style="{ color: stat.trendType === 'up' ? '#34A853' : stat.trendType === 'down' ? '#EA4335' : '#9F968A', fontSize: '12px' }">
+            <span
+              class="trend-text"
+              :style="{ color: stat.trendType === 'up' ? '#34A853' : stat.trendType === 'down' ? '#EA4335' : '#9F968A' }"
+            >
               环比 {{ stat.trend }}
             </span>
           </div>
@@ -343,28 +354,61 @@ function createApproval() {
   margin-bottom: 0;
 }
 
+.stat-card {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
+}
+
+.stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6E665B;
+}
+
 .stat-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.stat-value {
+  font-size: 30px;
+  font-weight: 600;
+  color: #2A261F;
+  line-height: 1.2;
+}
+
 .stat-trend {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 8px;
+  margin-top: 4px;
+}
+
+.trend-text {
+  font-size: 12px;
 }
 
 .toolbar-card {
   margin-bottom: 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
 }
 
 .table-card {
   min-height: calc(100vh - 360px);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(42, 38, 31, 0.04), 0 4px 12px rgba(42, 38, 31, 0.04);
 }
 
 .pagination-bar {

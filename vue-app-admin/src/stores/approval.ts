@@ -1,90 +1,127 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Approval, ApprovalStatus, ApprovalType } from '@/types'
-import { approveApproval, rejectApproval, deleteApproval } from '@/api/approval'
+import type { Approval, ApprovalStatus, ApprovalType, ApprovalTimeline } from '@/types'
+import {
+  getApprovalList,
+  approveApproval,
+  rejectApproval,
+  deleteApproval
+} from '@/api/approval'
+import type { ApiApproval, ApprovalQueryParams } from '@/types'
+
+/**
+ * 视图模型 <-> 后端实体映射
+ * 视图模型 Approval 含 applicant/submitTime/approver/timeline；后端 ApiApproval 含 applicantId/createdAt/applicant
+ */
+
+const typeApiToView = (t: ApiApproval['type']): ApprovalType => {
+  switch (t) {
+    case 'leave': return 'leave'
+    case 'expense': return 'reimburse'
+    case 'procurement': return 'purchase'
+    case 'business_trip': return 'seal'
+    default: return 'seal'
+  }
+}
+
+const statusApiToView = (s: ApiApproval['status']): ApprovalStatus => {
+  if (s === 'approved') return 'approved'
+  if (s === 'rejected') return 'rejected'
+  return 'pending'
+}
+
+const formatApiToView = (a: ApiApproval): Approval => ({
+  id: a.id,
+  title: a.title,
+  applicant: a.applicant?.name || '未知',
+  type: typeApiToView(a.type),
+  amount: a.amount,
+  submitTime: (a.createdAt || '').slice(0, 16).replace('T', ' '),
+  approver: '',
+  status: statusApiToView(a.status),
+  content: a.content,
+  timeline: [] as ApprovalTimeline[]
+})
 
 export const useApprovalStore = defineStore('approval', () => {
   const approvals = ref<Approval[]>([])
   const loading = ref(false)
+  const total = ref(0)
 
-  const pendingCount = computed(() => approvals.value.filter(a => a.status === 'pending').length)
-  const processingCount = computed(() => approvals.value.filter(a => a.status === 'processing').length)
-  const approvedCount = computed(() => approvals.value.filter(a => a.status === 'approved').length)
-  const rejectedCount = computed(() => approvals.value.filter(a => a.status === 'rejected').length)
+  const pendingCount = computed(() => approvals.value.filter((a) => a.status === 'pending').length)
+  const processingCount = computed(() => approvals.value.filter((a) => a.status === 'processing').length)
+  const approvedCount = computed(() => approvals.value.filter((a) => a.status === 'approved').length)
+  const rejectedCount = computed(() => approvals.value.filter((a) => a.status === 'rejected').length)
 
   const setApprovals = (data: Approval[]) => {
     approvals.value = data
   }
 
-  const fetchApprovals = async (params?: { status?: ApprovalStatus; type?: ApprovalType; keyword?: string }) => {
+  /** 从后端拉取审批列表 */
+  const fetchApprovals = async (params?: ApprovalQueryParams) => {
     loading.value = true
     try {
-      // TODO: replace with API call when backend is ready
-      console.log('fetch approvals with params', params)
+      const { data } = await getApprovalList(params)
+      approvals.value = data.list.map(formatApiToView)
+      total.value = data.total
+    } catch {
+      // 接口异常时保留现有列表
     } finally {
       loading.value = false
     }
   }
 
-  const getApprovalById = (id: number): Approval | undefined => {
-    return approvals.value.find(a => a.id === id)
+  const getApprovalById = (id: number | string): Approval | undefined => {
+    return approvals.value.find((a) => String(a.id) === String(id))
   }
 
-  const approveItem = async (id: number) => {
-    const item = approvals.value.find(a => a.id === id)
+  const pushTimeline = (item: Approval, actor: string, action: string) => {
+    item.timeline.push({
+      time: new Date().toLocaleString('zh-CN', { hour12: false }),
+      actor,
+      action
+    })
+  }
+
+  const approveItem = async (id: number | string) => {
+    const item = getApprovalById(id)
     if (!item) return
     try {
-      await approveApproval(id)
-      item.status = 'approved'
-      item.timeline.push({
-        time: new Date().toLocaleString('zh-CN', { hour12: false }),
-        actor: '管理员',
-        action: '审批通过'
-      })
+      const { data } = await approveApproval(String(id))
+      Object.assign(item, formatApiToView(data))
+      pushTimeline(item, '管理员', '审批通过')
     } catch {
-      // fallback for demo mode
       item.status = 'approved'
-      item.timeline.push({
-        time: new Date().toLocaleString('zh-CN', { hour12: false }),
-        actor: '管理员',
-        action: '审批通过'
-      })
+      pushTimeline(item, '管理员', '审批通过')
     }
   }
 
-  const rejectItem = async (id: number) => {
-    const item = approvals.value.find(a => a.id === id)
+  const rejectItem = async (id: number | string) => {
+    const item = getApprovalById(id)
     if (!item) return
     try {
-      await rejectApproval(id)
-      item.status = 'rejected'
-      item.timeline.push({
-        time: new Date().toLocaleString('zh-CN', { hour12: false }),
-        actor: '管理员',
-        action: '驳回申请'
-      })
+      const { data } = await rejectApproval(String(id))
+      Object.assign(item, formatApiToView(data))
+      pushTimeline(item, '管理员', '驳回申请')
     } catch {
       item.status = 'rejected'
-      item.timeline.push({
-        time: new Date().toLocaleString('zh-CN', { hour12: false }),
-        actor: '管理员',
-        action: '驳回申请'
-      })
+      pushTimeline(item, '管理员', '驳回申请')
     }
   }
 
-  const deleteItem = async (id: number) => {
+  const deleteItem = async (id: number | string) => {
     try {
-      await deleteApproval(id)
-      approvals.value = approvals.value.filter(a => a.id !== id)
+      await deleteApproval(String(id))
     } catch {
-      approvals.value = approvals.value.filter(a => a.id !== id)
+      // 演示模式忽略
     }
+    approvals.value = approvals.value.filter((a) => String(a.id) !== String(id))
   }
 
   return {
     approvals,
     loading,
+    total,
     pendingCount,
     processingCount,
     approvedCount,

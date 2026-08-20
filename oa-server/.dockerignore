@@ -1,0 +1,19 @@
+# 构建上下文排除清单 - 减小镜像构建上下文体积、避免缓存失效
+node_modules
+dist
+coverage
+.git
+.gitignore
+.env
+.env.local
+.env.*.local
+*.log
+logs
+.DS_Store
+.idea
+.vscode
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+test

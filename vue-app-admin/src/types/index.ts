@@ -2,7 +2,7 @@ export type UserRole = 'admin' | 'member' | 'visitor'
 export type UserStatus = 'active' | 'inactive' | 'pending'
 
 export interface User {
-  id: number
+  id: number | string
   name: string
   email: string
   department: string
@@ -22,7 +22,7 @@ export interface ApprovalTimeline {
 }
 
 export interface Approval {
-  id: number
+  id: number | string
   title: string
   applicant: string
   type: ApprovalType
@@ -38,7 +38,7 @@ export type KbDocStatus = '已发布' | '草稿' | '已归档'
 export type KbDocStatusType = 'success' | 'warning' | 'default'
 
 export interface KbDoc {
-  id: number
+  id: number | string
   title: string
   category: string
   author: string
@@ -132,4 +132,166 @@ export interface PaginatedData<T> {
 export interface SelectOption {
   label: string
   value: string
+}
+
+// ============================================================
+// 以下为与后端实体对齐的 API 数据类型（后端直接返回，无 ApiResponse 包裹）
+// 实体主键均为 UUID 字符串；上方旧视图模型类型保留供现有页面使用
+// ============================================================
+
+export type ApiUserRole = 'admin' | 'user'
+export type ApiUserStatus = 'active' | 'disabled'
+
+export interface ApiUser {
+  id: string
+  name: string
+  email: string
+  role: ApiUserRole
+  dept: string
+  avatarColor: string
+  status: ApiUserStatus
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface ApiLoginResult {
+  token: string
+  user: ApiUser
+}
+
+export interface CreateUserPayload {
+  name: string
+  email: string
+  password: string
+  role?: ApiUserRole
+  dept?: string
+  status?: ApiUserStatus
+  avatarColor?: string
+}
+
+export interface UpdateUserPayload {
+  name?: string
+  email?: string
+  password?: string
+  role?: ApiUserRole
+  dept?: string
+  status?: ApiUserStatus
+  avatarColor?: string
+}
+
+export interface UserQueryParams {
+  keyword?: string
+  dept?: string
+  status?: ApiUserStatus
+  page?: number
+  pageSize?: number
+}
+
+export type ApiApprovalType = 'leave' | 'expense' | 'procurement' | 'business_trip' | 'other'
+export type ApiApprovalStatus = 'pending' | 'approved' | 'rejected'
+export type ApiApprovalUrgency = 'low' | 'medium' | 'high'
+
+export interface ApiApproval {
+  id: string
+  applicantId: string
+  type: ApiApprovalType
+  title: string
+  content: string
+  amount: number | null
+  status: ApiApprovalStatus
+  urgency: ApiApprovalUrgency
+  remark: string | null
+  createdAt: string
+  updatedAt: string
+  applicant?: Pick<ApiUser, 'id' | 'name' | 'dept' | 'avatarColor' | 'role'>
+}
+
+export interface ApprovalQueryParams {
+  keyword?: string
+  type?: ApiApprovalType
+  status?: ApiApprovalStatus
+  page?: number
+  pageSize?: number
+}
+
+export interface CreateApprovalPayload {
+  type: ApiApprovalType
+  title: string
+  content: string
+  amount?: number
+  urgency?: ApiApprovalUrgency
+}
+
+export interface UpdateApprovalPayload {
+  type?: ApiApprovalType
+  title?: string
+  content?: string
+  amount?: number
+  urgency?: ApiApprovalUrgency
+}
+
+export interface ApiPendingStats {
+  pendingCount: number
+}
+
+export interface ApiKbDoc {
+  id: string
+  title: string
+  category: string
+  tags: string[]
+  summary: string | null
+  content: string
+  authorId: string
+  views: number
+  createdAt: string
+  updatedAt: string
+  author?: Pick<ApiUser, 'id' | 'name' | 'dept' | 'avatarColor' | 'role'>
+}
+
+export interface ApiHotDoc {
+  id: string
+  title: string
+  category: string
+  views: number
+  createdAt: string
+}
+
+export interface KbQueryParams {
+  keyword?: string
+  category?: string
+  tag?: string
+  page?: number
+  pageSize?: number
+}
+
+export interface CreateKbPayload {
+  title: string
+  category: string
+  tags?: string[]
+  summary?: string
+  content: string
+}
+
+export interface ApiDashboardStats {
+  totalUsers: number
+  activeUsers: number
+  pendingApprovals: number
+  totalDocs: number
+}
+
+export interface ApiTrendItem {
+  date: string
+  newUsers: number
+  newApprovals: number
+  newDocs: number
+}
+
+export interface ApiDeptContribution {
+  dept: string
+  count: number
+}
+
+export interface ApiDashboardOverview extends ApiDashboardStats {
+  trends: ApiTrendItem[]
+  deptContributions: ApiDeptContribution[]
 }

@@ -1,26 +1,62 @@
 import request from './request'
-import type { ApiResponse, PaginatedData, User, UserPayload } from '@/types'
+import type {
+  ApiUser,
+  ApiUserStatus,
+  CreateUserPayload,
+  UpdateUserPayload,
+  UserQueryParams,
+  PaginatedData
+} from '@/types'
 
-export function getUserList(params?: { page?: number; pageSize?: number; keyword?: string; status?: string; role?: string }) {
-  return request.get<ApiResponse<PaginatedData<User>>>('/users', { params })
+/**
+ * 用户管理接口对接
+ * 后端 Controller 路径为 /users，主键为 UUID 字符串
+ */
+
+/** 用户列表（分页，支持 keyword/dept/status 筛选）*/
+export function getUserList(params?: UserQueryParams) {
+  return request.get<PaginatedData<ApiUser>>('/users', { params })
 }
 
-export function getUserDetail(id: number) {
-  return request.get<ApiResponse<User>>(`/users/${id}`)
+/** 部门列表（后端返回 string[]）*/
+export function getDepartments() {
+  return request.get<string[]>('/users/departments')
 }
 
-export function createUser(data: UserPayload) {
-  return request.post<ApiResponse<User>>('/users', data)
+/** 用户详情 */
+export function getUserDetail(id: string) {
+  return request.get<ApiUser>(`/users/${id}`)
 }
 
-export function updateUser(id: number, data: UserPayload) {
-  return request.put<ApiResponse<User>>(`/users/${id}`, data)
+/** 创建用户（仅管理员）*/
+export function createUser(data: CreateUserPayload) {
+  return request.post<ApiUser>('/users', data)
 }
 
-export function deleteUser(id: number) {
-  return request.delete<ApiResponse<null>>(`/users/${id}`)
+/** 更新用户（PATCH，仅管理员）*/
+export function updateUser(id: string, data: UpdateUserPayload) {
+  return request.patch<ApiUser>(`/users/${id}`, data)
 }
 
-export function disableUser(id: number) {
-  return request.patch<ApiResponse<User>>(`/users/${id}/disable`)
+/** 删除用户（仅管理员）*/
+export function deleteUser(id: string) {
+  return request.delete<{ id: string }>(`/users/${id}`)
+}
+
+/**
+ * 启用/禁用用户
+ * 后端为 PATCH /users/:id/status，body: { status }
+ */
+export function updateUserStatus(id: string, status: ApiUserStatus) {
+  return request.patch<ApiUser>(`/users/${id}/status`, { status })
+}
+
+/** 禁用用户（updateUserStatus 的便捷封装）*/
+export function disableUser(id: string) {
+  return updateUserStatus(id, 'disabled')
+}
+
+/** 启用用户 */
+export function enableUser(id: string) {
+  return updateUserStatus(id, 'active')
 }

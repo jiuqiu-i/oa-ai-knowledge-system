@@ -1,26 +1,48 @@
 import request from './request'
-import type { ApiResponse, KbDoc, KbDocPayload, KbCategory, PaginatedData } from '@/types'
+import type {
+  ApiHotDoc,
+  ApiKbDoc,
+  CreateKbPayload,
+  KbQueryParams,
+  PaginatedData
+} from '@/types'
 
+/**
+ * 知识库接口对接
+ * 后端 Controller 路径为 /knowledge-base，主键为 UUID 字符串
+ */
+
+/** 分类列表（后端返回 string[]）*/
 export function getKbCategories() {
-  return request.get<ApiResponse<KbCategory[]>>('/kb/categories')
+  return request.get<string[]>('/knowledge-base/categories')
 }
 
-export function getKbDocuments(params?: { page?: number; pageSize?: number; keyword?: string; category?: string }) {
-  return request.get<ApiResponse<PaginatedData<KbDoc>>>('/kb/documents', { params })
+/** 热门文档 */
+export function getHotDocs() {
+  return request.get<ApiHotDoc[]>('/knowledge-base/hot')
 }
 
-export function getKbDocumentDetail(id: number) {
-  return request.get<ApiResponse<KbDoc>>(`/kb/documents/${id}`)
+/** 文档列表 / 搜索（后端分页返回 { list, total, page, pageSize }）*/
+export function getKbDocuments(params?: KbQueryParams) {
+  return request.get<PaginatedData<ApiKbDoc>>('/knowledge-base', { params })
 }
 
-export function createKbDocument(data: KbDocPayload) {
-  return request.post<ApiResponse<KbDoc>>('/kb/documents', data)
+/** 文档详情（同时自增浏览量）*/
+export function getKbDocumentDetail(id: string) {
+  return request.get<ApiKbDoc>(`/knowledge-base/${id}`)
 }
 
-export function updateKbDocument(id: number, data: KbDocPayload) {
-  return request.put<ApiResponse<KbDoc>>(`/kb/documents/${id}`, data)
+/** 创建文档（authorId 由后端从当前登录用户注入）*/
+export function createKbDocument(data: CreateKbPayload) {
+  return request.post<ApiKbDoc>('/knowledge-base', data)
 }
 
-export function deleteKbDocument(id: number) {
-  return request.delete<ApiResponse<null>>(`/kb/documents/${id}`)
+/** 更新文档（PATCH）*/
+export function updateKbDocument(id: string, data: Partial<CreateKbPayload>) {
+  return request.patch<ApiKbDoc>(`/knowledge-base/${id}`, data)
+}
+
+/** 删除文档 */
+export function deleteKbDocument(id: string) {
+  return request.delete<{ id: string }>(`/knowledge-base/${id}`)
 }

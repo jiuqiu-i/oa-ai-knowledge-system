@@ -1,0 +1,132 @@
+# OA 办公知识库 - 全栈编排（五容器：DB / Cache / Backend / Frontend / Nginx）
+# 使用：docker compose up -d --build
+# 内网访问：http://<服务器IP>（用户端）、http://<服务器IP>/admin/（管理端）
+# 健康检查：http://<服务器IP>/health
+
+version: '3.8'
+
+services:
+  # 1) 数据库 - MySQL 主库
+  mysql:
+    image: mysql:8.0
+    container_name: oa_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-oa_knowledge_db}
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - oa_mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - oa_net
+
+  # 2) 缓存与会话 - Redis
+  redis:
+    image: redis:7-alpine
+    container_name: oa_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - oa_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oa_net
+
+  # 3) 后端 - NestJS（node:alpine 多阶段构建产物）
+  backend:
+    build:
+      context: ./oa-server
+      dockerfile: Dockerfile
+    container_name: oa_backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      DB_DATABASE: ${DB_DATABASE:-oa_knowledge_db}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-oa_ai_knowledge_system_jwt_secret_key_change_in_production}
+      JWT_EXPIRES_IN: 7d
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-3.5-turbo}
+      # 多模型支持：透传 OPENAI_BASE_URL 以切换通义千问/DeepSeek/MiniMax 等 OpenAI 兼容端点
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      LOG_DIR: /app/logs
+    volumes:
+      - oa_backend_logs:/app/logs
+    ports:
+      - "3000:3000"
+    healthcheck:
+      # 自愈探针：后端 /health 端点（已排除 /api 全局前缀）
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - oa_net
+
+  # 4) 前端 - 统一静态容器（用户端 + 管理端 SPA）
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/frontend.Dockerfile
+    container_name: oa_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - oa_net
+
+  # 5) 网关 - Nginx 反向代理（动静分离 + Gzip + SSE 透传 + 健康检查）
+  nginx:
+    build:
+      context: .
+      dockerfile: deploy/nginx/Dockerfile
+    container_name: oa_gateway
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oa_net
+
+volumes:
+  oa_mysql_data:
+  oa_redis_data:
+  oa_backend_logs:
+
+networks:
+  oa_net:
+    driver: bridge

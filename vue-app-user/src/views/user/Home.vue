@@ -203,7 +203,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMessage } from 'naive-ui'
 import type {
@@ -222,7 +222,8 @@ import {
   FilePlus, FileText, Sparkles, Clock, Loader2, Check,
   BookOpen
 } from 'lucide-vue-next'
-import { useUserStore, useApprovalStore } from '@/stores'
+import { useUserStore, useApprovalStore, useKbStore } from '@/stores'
+import { createDoc } from '@/api/kb'
 import type { Component } from 'vue'
 import type { ApprovalType } from '@/types'
 
@@ -230,8 +231,20 @@ const router = useRouter()
 const message = useMessage()
 const userStore = useUserStore()
 const approvalStore = useApprovalStore()
+const kbStore = useKbStore()
 
 const goAi = () => router.push('/ai')
+
+// 进入首页时尝试恢复登录态并拉取我的审批与知识库数据（后端不可达时保留演示数据）
+onMounted(async () => {
+  await userStore.fetchProfile()
+  await Promise.all([
+    approvalStore.fetchMyApprovals(),
+    approvalStore.fetchStats(),
+    kbStore.fetchHotDocs(),
+    kbStore.fetchDocs({ pageSize: 5 }),
+  ])
+})
 
 const today = new Date()
 const todayText = `${today.getFullYear()} 年 ${today.getMonth() + 1} 月 ${today.getDate()} 日`
@@ -262,11 +275,20 @@ interface RecentDoc {
   updated: string
 }
 
-const recentDocs: RecentDoc[] = [
-  { name: '项目周报 2026-W33', space: '产品知识库', updated: '昨天 18:20' },
-  { name: 'Q3 销售数据看板', space: '销售部门', updated: '8 月 14 日' },
-  { name: 'API 接口规范 v2.1', space: '技术研发', updated: '8 月 12 日' }
-]
+const recentDocs = computed<RecentDoc[]>(() => {
+  if (kbStore.docs.length > 0) {
+    return kbStore.docs.slice(0, 3).map((d) => ({
+      name: d.title,
+      space: d.category,
+      updated: d.updated
+    }))
+  }
+  return [
+    { name: '项目周报 2026-W33', space: '产品知识库', updated: '昨天 18:20' },
+    { name: 'Q3 销售数据看板', space: '销售部门', updated: '8 月 14 日' },
+    { name: 'API 接口规范 v2.1', space: '技术研发', updated: '8 月 12 日' }
+  ]
+})
 
 const docColumns: DataTableColumns<RecentDoc> = [
   { title: '文档名称', key: 'name' },
@@ -279,11 +301,19 @@ interface KbRecommendation {
   meta: string
 }
 
-const kbRecommendations: KbRecommendation[] = [
-  { title: '新员工入职指南', meta: '人事行政 · 128 次阅读' },
-  { title: '高效会议记录模板', meta: '效率办公 · 86 次阅读' },
-  { title: '费用报销流程说明', meta: '财务制度 · 204 次阅读' }
-]
+const kbRecommendations = computed<KbRecommendation[]>(() => {
+  if (kbStore.hotDocs.length > 0) {
+    return kbStore.hotDocs.slice(0, 3).map((d) => ({
+      title: d.title,
+      meta: `${d.category} · ${d.views} 次阅读`
+    }))
+  }
+  return [
+    { title: '新员工入职指南', meta: '人事行政 · 128 次阅读' },
+    { title: '高效会议记录模板', meta: '效率办公 · 86 次阅读' },
+    { title: '费用报销流程说明', meta: '财务制度 · 204 次阅读' }
+  ]
+})
 
 interface CalendarEvent {
   month: string
@@ -384,9 +414,19 @@ const openDocModal = () => {
 }
 
 const submitDoc = () => {
-  docFormRef.value?.validate((errors?: FormValidationError[]) => {
+  docFormRef.value?.validate(async (errors?: FormValidationError[]) => {
     if (errors) return
-    message.success(`文档「${docForm.value.title}」创建成功`)
+    try {
+      const spaceLabel = docSpaceOptions.find((o) => o.value === docForm.value.space)?.label || docForm.value.space
+      await createDoc({
+        title: docForm.value.title,
+        category: spaceLabel,
+        content: '',
+      })
+      message.success(`文档「${docForm.value.title}」创建成功`)
+    } catch {
+      message.error('文档创建失败，请检查网络或后端服务')
+    }
     docVisible.value = false
   })
 }
