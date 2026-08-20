@@ -22,6 +22,7 @@ export class AiService {
     this.openaiApiKey = this.configService.get<string>('OPENAI_API_KEY') || '';
     this.openaiModel = this.configService.get<string>('OPENAI_MODEL') || 'gpt-3.5-turbo';
     this.openaiBaseUrl = this.configService.get<string>('OPENAI_BASE_URL') || '';
+    this.logger.log('Initializing OpenAI API', { openaiApiKey: this.openaiApiKey, openaiModel: this.openaiModel, openaiBaseUrl: this.openaiBaseUrl }  );
   }
 
   async getConversations(userId: string) {

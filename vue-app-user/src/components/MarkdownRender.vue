@@ -1,15 +1,18 @@
 <template>
-  <div class="markdown-body" :class="{ streaming }" v-html="sanitizedHtml" />
+  <!-- 思考/流式过程中：纯文本预览 + 打字机光标 -->
+  <div v-if="streaming" class="streaming-preview">{{ content }}<span class="type-cursor" /></div>
+  <!-- 最终结果：Markdown 渲染 -->
+  <div v-else class="markdown-body" v-html="renderedHtml" />
 </template>
 
 <script setup lang="ts">
-import { watch, ref } from 'vue'
-import { marked } from 'marked'
+import { computed } from 'vue'
+import { Marked } from 'marked'
 import DOMPurify from 'dompurify'
 
 interface Props {
   content: string
-  /** 流式输出进行中：禁用代码高亮等重计算，仅保证文本安全追加 */
+  /** 流式输出进行中：纯文本打字机预览，不做 Markdown 解析 */
   streaming?: boolean
 }
 
@@ -18,34 +21,48 @@ const props = withDefaults(defineProps<Props>(), {
   streaming: false,
 })
 
-// marked 配置：开启 GFM、换行转 <br>（聊天场景常见）
-marked.setOptions({
+// 独立 Marked 实例，避免污染全局
+const markdown = new Marked()
+markdown.setOptions({
   gfm: true,
   breaks: true,
 })
 
-// 流式期间频繁重渲染，用 ref 缓存上一次结果，避免未变化时重复 sanitize
-const sanitizedHtml = ref('')
-
-const render = () => {
-  if (!props.content) {
-    sanitizedHtml.value = ''
-    return
-  }
-  const raw = marked.parse(props.content, { async: false }) as string
-  // DOMPurify 清洗 XSS：禁用危险标签/属性，保留代码块与基础排版
-  sanitizedHtml.value = DOMPurify.sanitize(raw, {
+/**
+ * 仅在非流式阶段计算最终 HTML。
+ * 流式期间模板直接展示纯文本 + 光标，不触发 marked（避免半截 markdown 解析错乱）。
+ * 使用 computed 保证 streaming 变为 false 时必然重新计算。
+ */
+const renderedHtml = computed(() => {
+  if (props.streaming) return ''
+  if (!props.content) return ''
+  const raw = markdown.parse(props.content, { async: false }) as string
+  return DOMPurify.sanitize(raw, {
     ADD_ATTR: ['target'],
     FORBID_TAGS: ['style', 'script', 'iframe', 'form'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick'],
   })
-}
-
-// 深度监听 content（流式 token 累积触发）
-watch(() => props.content, render, { immediate: true })
+})
 </script>
 
 <style scoped>
+/* 思考过程预览：纯文本打字机效果 */
+.streaming-preview {
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--oak-ink-2, var(--oak-ink));
+}
+.type-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  background: var(--oak-primary);
+  animation: stream-blink 1s step-end infinite;
+}
 .markdown-body {
   font-size: 14px;
   line-height: 1.7;
@@ -130,18 +147,7 @@ watch(() => props.content, render, { immediate: true })
   border-top: 1px solid var(--oak-line);
   margin: 12px 0;
 }
-/* 流式输出光标：附在内容末尾，避免块级换行 */
-.markdown-body.streaming :deep(p:last-child)::after,
-.markdown-body.streaming :deep(pre:last-child)::after {
-  content: '';
-  display: inline-block;
-  width: 7px;
-  height: 1em;
-  margin-left: 3px;
-  vertical-align: text-bottom;
-  background: var(--oak-primary);
-  animation: stream-blink 1s step-end infinite;
-}
+/* 流式输出打字机光标动画 */
 @keyframes stream-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }

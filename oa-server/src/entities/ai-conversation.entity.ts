@@ -13,6 +13,8 @@ export interface AiMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
   timestamp?: string;
+  /** 思考步骤列表（工具调用轨迹），仅 assistant 消息有 */
+  thinkingSteps?: string[];
 }
 
 @Entity('ai_conversations')

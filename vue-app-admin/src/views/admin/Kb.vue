@@ -24,8 +24,7 @@ import {
   NEmpty,
   NDivider,
   NSpin,
-  useMessage,
-  useDialog
+  useMessage
 } from 'naive-ui'
 import {
   Search,
@@ -45,8 +44,11 @@ import { useKbStore } from '@/stores'
 import { getKbDocumentDetail } from '@/api/kb'
 
 const message = useMessage()
-const dialog = useDialog()
 const kbStore = useKbStore()
+
+// 删除确认弹窗
+const showDeleteModal = ref(false)
+const pendingDeleteDoc = ref<KbDoc | null>(null)
 
 const searchKeyword = ref('')
 const page = ref(1)
@@ -258,17 +260,17 @@ async function viewDoc(row: KbDoc) {
 
 // ========== 删除确认 ==========
 function confirmDelete(row: KbDoc) {
-  dialog.warning({
-    title: '确认删除',
-    content: `确定要删除《${row.title}》吗？`,
-    positiveText: '确认删除',
-    negativeText: '取消',
-    onPositiveClick: async () => {
-      await kbStore.deleteDocument(row.id)
-      message.success('文档已删除')
-      nextTick(() => fetchFromApi())
-    }
-  })
+  pendingDeleteDoc.value = row
+  showDeleteModal.value = true
+}
+
+async function executeDelete() {
+  if (!pendingDeleteDoc.value) return
+  await kbStore.deleteDocument(pendingDeleteDoc.value.id)
+  message.success('文档已删除')
+  showDeleteModal.value = false
+  pendingDeleteDoc.value = null
+  nextTick(() => fetchFromApi())
 }
 
 // ========== 功能入口：后端暂不支持的操作给出明确提示，而不是"什么都不发生" ==========
@@ -420,6 +422,17 @@ function createCategory() {
         </div>
       </n-drawer-content>
     </n-drawer>
+
+    <!-- 删除确认弹窗 -->
+    <n-modal v-model:show="showDeleteModal" preset="dialog" title="确认删除" :show-icon="false">
+      <span>确定要删除《{{ pendingDeleteDoc?.title }}》吗？</span>
+      <template #action>
+        <n-space justify="end" :size="12">
+          <n-button @click="showDeleteModal = false">取消</n-button>
+          <n-button type="error" @click="executeDelete">确认删除</n-button>
+        </n-space>
+      </template>
+    </n-modal>
   </div>
 </template>
 

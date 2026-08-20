@@ -46,6 +46,7 @@ interface MenuItem {
   label: string
   icon: Component
   path: string
+  newWindow?: boolean
 }
 
 const activeKey = computed(() => {
@@ -62,7 +63,7 @@ const rawMenu: MenuItem[] = [
   { key: 'index', label: '首页', icon: Home, path: '/' },
   { key: 'home', label: '工作台', icon: LayoutDashboard, path: '/home' },
   { key: 'kb', label: '知识库', icon: BookOpen, path: '/kb' },
-  { key: 'ai', label: 'AI 助手', icon: Bot, path: '/ai' }
+  { key: 'ai', label: 'AI 助手', icon: Bot, path: '/ai', newWindow: true }
 ]
 
 const menuOptions = computed<MenuOption[]>(() =>
@@ -75,7 +76,9 @@ const menuOptions = computed<MenuOption[]>(() =>
 
 const onMenuSelect = (key: string) => {
   const item = rawMenu.find((i) => i.key === key)
-  if (item) router.push(item.path)
+  if(item?.newWindow) {
+    window.open(item.path, '_blank')
+  } else if (item) router.push(item.path)
 }
 
 const goLogin = () => router.push('/login')

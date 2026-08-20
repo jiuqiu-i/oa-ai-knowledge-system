@@ -15,9 +15,9 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'Index', component: Index },
       { path: 'home', name: 'Home', component: Home },
       { path: 'kb', name: 'KbExplore', component: KbExplore },
-      { path: 'ai', name: 'AiAssistant', component: AiAssistant }
     ]
   },
+  { path: '/ai', name: 'AiAssistant', component: AiAssistant },
   {
     path: '/login',
     name: 'Login',

@@ -17,45 +17,87 @@
         <div class="session-list">
           <template v-if="todaySessions.length">
             <p class="group-title">今天</p>
-            <n-button
+            <div
               v-for="session in todaySessions"
               :key="session.id"
-              quaternary
-              block
-              :type="session.active ? 'primary' : 'default'"
-              class="session-btn"
-              @click="aiStore.selectSession(session.id)"
+              class="session-item"
+              :class="{ active: session.active }"
             >
-              {{ session.title }}
-            </n-button>
+              <n-button
+                quaternary
+                block
+                :type="session.active ? 'primary' : 'default'"
+                class="session-btn"
+                @click="aiStore.selectSession(session.id)"
+              >
+                <span class="session-title">{{ session.title }}</span>
+              </n-button>
+              <n-button
+                quaternary
+                size="tiny"
+                class="session-del"
+                title="删除对话"
+                @click.stop="confirmDeleteSession(session)"
+              >
+                <template #icon><Trash2 :size="14" /></template>
+              </n-button>
+            </div>
           </template>
           <template v-if="yesterdaySessions.length">
             <p class="group-title">昨天</p>
-            <n-button
+            <div
               v-for="session in yesterdaySessions"
               :key="session.id"
-              quaternary
-              block
-              :type="session.active ? 'primary' : 'default'"
-              class="session-btn"
-              @click="aiStore.selectSession(session.id)"
+              class="session-item"
+              :class="{ active: session.active }"
             >
-              {{ session.title }}
-            </n-button>
+              <n-button
+                quaternary
+                block
+                :type="session.active ? 'primary' : 'default'"
+                class="session-btn"
+                @click="aiStore.selectSession(session.id)"
+              >
+                <span class="session-title">{{ session.title }}</span>
+              </n-button>
+              <n-button
+                quaternary
+                size="tiny"
+                class="session-del"
+                title="删除对话"
+                @click.stop="confirmDeleteSession(session)"
+              >
+                <template #icon><Trash2 :size="14" /></template>
+              </n-button>
+            </div>
           </template>
           <template v-if="earlierSessions.length">
             <p class="group-title">更早</p>
-            <n-button
+            <div
               v-for="session in earlierSessions"
               :key="session.id"
-              quaternary
-              block
-              :type="session.active ? 'primary' : 'default'"
-              class="session-btn"
-              @click="aiStore.selectSession(session.id)"
+              class="session-item"
+              :class="{ active: session.active }"
             >
-              {{ session.title }}
-            </n-button>
+              <n-button
+                quaternary
+                block
+                :type="session.active ? 'primary' : 'default'"
+                class="session-btn"
+                @click="aiStore.selectSession(session.id)"
+              >
+                <span class="session-title">{{ session.title }}</span>
+              </n-button>
+              <n-button
+                quaternary
+                size="tiny"
+                class="session-del"
+                title="删除对话"
+                @click.stop="confirmDeleteSession(session)"
+              >
+                <template #icon><Trash2 :size="14" /></template>
+              </n-button>
+            </div>
           </template>
           <p v-if="!aiStore.sessions.length" class="group-title" style="opacity:.6">暂无历史会话</p>
         </div>
@@ -81,7 +123,7 @@
       </div>
 
       <!-- Messages -->
-      <div ref="scrollRef" class="chat-messages">
+      <n-scrollbar ref="scrollRef" class="chat-messages" style="max-height: calc(100vh - 56px - 114px);">
         <div class="messages-inner">
           <!-- Welcome -->
           <div v-if="aiStore.messages.length === 0" class="welcome">
@@ -115,7 +157,40 @@
                 <Bot :size="16" />
               </div>
               <div class="ai-bubble">
-                <!-- Agent 回复：Markdown 实时渲染，流式时末尾显示闪烁光标 -->
+                <!-- 思考过程折叠面板：仅在有思考步骤时显示 -->
+                <div
+                  v-if="msg.thinkingSteps && msg.thinkingSteps.length"
+                  class="thinking-panel"
+                  :class="{ expanded: isThinkingExpanded(msg.id, msg.streaming) }"
+                >
+                  <button
+                    class="thinking-toggle"
+                    @click="toggleThinking(msg.id)"
+                  >
+                    <Brain :size="14" />
+                    <span class="thinking-label">
+                      {{ msg.streaming ? '思考中...' : '思考过程' }}
+                      <span class="thinking-count">({{ msg.thinkingSteps.length }})</span>
+                    </span>
+                    <ChevronDown
+                      :size="14"
+                      class="chevron"
+                      :class="{ rotated: !isThinkingExpanded(msg.id, msg.streaming) }"
+                    />
+                  </button>
+                  <div v-if="isThinkingExpanded(msg.id, msg.streaming)" class="thinking-steps">
+                    <div
+                      v-for="(step, idx) in msg.thinkingSteps"
+                      :key="idx"
+                      class="thinking-step"
+                    >
+                      <span class="step-dot" />
+                      <span class="step-text">{{ step }}</span>
+                    </div>
+                    <div v-if="msg.streaming" class="thinking-cursor" />
+                  </div>
+                </div>
+                <!-- Agent 回复：流式期间纯文本打字机预览，结束后 Markdown 渲染 -->
                 <MarkdownRender :content="msg.content" :streaming="msg.streaming" />
               </div>
             </template>
@@ -131,12 +206,12 @@
             </div>
           </div>
         </div>
-      </div>
+      </n-scrollbar>
 
       <!-- Input -->
       <div class="chat-input-area">
         <div class="input-inner">
-          <n-space align="center" class="input-box">
+          <div class="input-box">
             <n-input
               v-model:value="inputText"
               type="textarea"
@@ -158,29 +233,62 @@
             <n-button v-else circle type="primary" :disabled="!inputText.trim()" @click="sendMessage">
               <template #icon><ArrowUp :size="16" /></template>
             </n-button>
-          </n-space>
-          <p class="oak-caption input-tip">AI 生成内容仅供参考，请核实重要信息。</p>
+          </div>
+          <p  class="oak-caption input-tip">AI 生成内容仅供参考，请核实重要信息。</p>
         </div>
       </div>
     </section>
+
+    <!-- 删除确认弹窗 -->
+    <n-modal v-model:show="showDeleteModal" preset="dialog" title="删除对话" :show-icon="false">
+      <span>确定删除「{{ pendingDeleteSession?.title || '新会话' }}」吗？删除后无法恢复。</span>
+      <template #action>
+        <n-space justify="end" :size="12">
+          <n-button @click="showDeleteModal = false">取消</n-button>
+          <n-button type="error" @click="executeDelete">删除</n-button>
+        </n-space>
+      </template>
+    </n-modal>
   </main>
 </template>
 
 <script setup lang="ts">
 import { ref, nextTick, watch, computed, onMounted } from 'vue'
 import {
-  NLayoutSider, NButton, NSpace, NInput
+  NLayoutSider, NButton, NSpace, NInput, NModal, NScrollbar, useMessage
 } from 'naive-ui'
+import type { ScrollbarInst } from 'naive-ui'
 import {
-  Plus, Bot, Sparkles, ArrowUp, Square
+  Plus, Bot, Sparkles, ArrowUp, Square, Trash2, Brain, ChevronDown
 } from 'lucide-vue-next'
 import { useAiStore } from '@/stores'
 import MarkdownRender from '@/components/MarkdownRender.vue'
 import type { AiSession } from '@/types'
 
 const aiStore = useAiStore()
+const message = useMessage()
 const inputText = ref('')
-const scrollRef = ref<HTMLElement | null>(null)
+const scrollRef = ref<ScrollbarInst | null>(null)
+
+// 思考过程折叠状态：messageId → 是否展开
+// 流式期间默认展开，结束后默认折叠
+const thinkingExpanded = ref<Record<string, boolean>>({})
+
+const isThinkingExpanded = (msgId: string, streaming?: boolean) => {
+  if (thinkingExpanded.value[msgId] !== undefined) {
+    return thinkingExpanded.value[msgId]
+  }
+  // 流式期间默认展开，结束后默认折叠
+  return !!streaming
+}
+
+const toggleThinking = (msgId: string) => {
+  thinkingExpanded.value[msgId] = !isThinkingExpanded(msgId, false)
+}
+
+// 删除确认弹窗
+const showDeleteModal = ref(false)
+const pendingDeleteSession = ref<AiSession | null>(null)
 
 // 会话列表按 updatedAt/createdAt 分组（今天/昨天/更早）
 const toDateKey = (iso?: string) => {
@@ -214,7 +322,7 @@ const quickPrompts = ['帮我写一份周报', '查询公司报销流程', '总�
 const scrollToBottom = () => {
   nextTick(() => {
     if (scrollRef.value) {
-      scrollRef.value.scrollTop = scrollRef.value.scrollHeight
+      scrollRef.value.scrollTo({ top: Number.MAX_SAFE_INTEGER })
     }
   })
 }
@@ -241,12 +349,25 @@ const sendMessage = () => {
 const sendQuick = (prompt: string) => {
   aiStore.sendMessage(prompt)
 }
+
+const confirmDeleteSession = (session: AiSession) => {
+  pendingDeleteSession.value = session
+  showDeleteModal.value = true
+}
+
+const executeDelete = async () => {
+  if (!pendingDeleteSession.value) return
+  await aiStore.removeSession(pendingDeleteSession.value.id)
+  message.success('对话已删除')
+  showDeleteModal.value = false
+  pendingDeleteSession.value = null
+}
 </script>
 
 <style scoped>
 .ai-main {
   display: flex;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh);
 }
 .ai-sider {
   background: var(--oak-surface-2);
@@ -270,9 +391,39 @@ const sendQuick = (prompt: string) => {
   font-weight: 500;
   color: var(--oak-ink-3);
 }
+.session-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
 .session-btn {
   justify-content: flex-start;
-  margin-bottom: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.session-btn :deep(.n-button__content) {
+  overflow: hidden;
+}
+.session-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.session-del {
+  position: absolute;
+  right: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  color: var(--oak-ink-3);
+}
+.session-item:hover .session-del,
+.session-item.active .session-del {
+  opacity: 1;
+}
+.session-del:hover {
+  color: var(--oak-state-error, #EA4335);
 }
 .chat-section {
   flex: 1;
@@ -312,7 +463,6 @@ const sendQuick = (prompt: string) => {
 }
 .chat-messages {
   flex: 1;
-  overflow-y: auto;
   padding: 24px;
 }
 .messages-inner {
@@ -362,6 +512,79 @@ const sendQuick = (prompt: string) => {
   color: var(--oak-ink);
   box-shadow: var(--oak-shadow-1);
 }
+/* 思考过程折叠面板 */
+.thinking-panel {
+  margin-bottom: 10px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--oak-line);
+  background: var(--oak-surface-2);
+  overflow: hidden;
+}
+.thinking-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--oak-ink-3);
+  text-align: left;
+}
+.thinking-toggle:hover {
+  color: var(--oak-ink);
+}
+.thinking-label {
+  flex: 1;
+  font-weight: 500;
+}
+.thinking-count {
+  opacity: 0.6;
+}
+.thinking-toggle .chevron {
+  transition: transform 0.2s ease;
+}
+.thinking-toggle .chevron.rotated {
+  transform: rotate(-90deg);
+}
+.thinking-steps {
+  padding: 4px 12px 10px;
+  border-top: 1px solid var(--oak-line);
+}
+.thinking-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--oak-ink-2);
+}
+.thinking-step .step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--oak-primary);
+  flex-shrink: 0;
+}
+.thinking-step .step-text {
+  line-height: 1.5;
+}
+.thinking-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-left: 14px;
+  vertical-align: text-bottom;
+  background: var(--oak-primary);
+  animation: stream-blink 1s step-end infinite;
+}
+@keyframes stream-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 .msg-text {
   margin: 0;
   font-size: 14px;
@@ -398,6 +621,8 @@ const sendQuick = (prompt: string) => {
   margin: 0 auto;
 }
 .input-box {
+  display: flex;
+  gap: 20px;
   width: 100%;
   padding: 10px 16px;
   border: 1px solid var(--oak-line);

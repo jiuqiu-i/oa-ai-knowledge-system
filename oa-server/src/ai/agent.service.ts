@@ -26,6 +26,7 @@ export class AgentService {
   private readonly openaiApiKey: string;
   private readonly openaiModel: string;
   private readonly openaiBaseUrl: string;
+  private readonly openaiTopP: number | undefined;
   private readonly systemPrompt: string;
   private toolsService: AiToolsService | null = null;
 
@@ -37,6 +38,10 @@ export class AgentService {
     this.openaiApiKey = this.configService.get<string>('OPENAI_API_KEY') || '';
     this.openaiModel = this.configService.get<string>('OPENAI_MODEL') || 'gpt-3.5-turbo';
     this.openaiBaseUrl = this.configService.get<string>('OPENAI_BASE_URL') || '';
+    // LangChain ChatOpenAI 默认 topP=1 会无条件发送；部分推理模型（如 kimi-k2.6）
+    // 仅允许 top_p=0.95，故通过 env 覆盖；未配置时默认 0.95 以兼容推理模型。
+    const envTopP = this.configService.get<string>('OPENAI_TOP_P');
+    this.openaiTopP = envTopP === undefined ? 0.95 : Number(envTopP);
     this.systemPrompt =
       '你是一位 OA 办公智能助手，可以调用工具查询知识库、审批统计、仪表盘报表。' +
       '收到用户指令后：1) 判断是否需要调用工具获取实时数据；2) 需要时调用合适工具；' +
@@ -53,8 +58,9 @@ export class AgentService {
     const llm = new ChatOpenAI({
       openAIApiKey: this.openaiApiKey,
       modelName: this.openaiModel,
-      temperature: 0.3,
       streaming: true,
+      topP: this.openaiTopP,
+      // temperature 不显式设置，由 API 默认值决定；部分推理模型（如 kimi-k2.6）仅允许 temperature=1
       configuration: this.openaiBaseUrl ? { baseURL: this.openaiBaseUrl } : undefined,
     });
 
@@ -120,55 +126,109 @@ export class AgentService {
   }
 
   /**
-   * 流式 Agent 对话 - AsyncGenerator 逐 token 产出
-   * 利用 Node.js 异步特性：工具调用阶段不阻塞事件循环，最终回复实时推送。
+   * 流式 Agent 对话 - AsyncGenerator 产出结构化 SSE 事件
+   *
+   * 事件协议（JSON 字符串，前端二次解析）：
+   *   {type:"thinking_step", content:"调用工具：知识库检索"}  — 思考步骤（工具调用）
+   *   {type:"thinking_step", content:"知识库检索 执行完成"}  — 思考步骤（工具结束）
+   *   {type:"token", content:"回复文本片段"}                — 最终回复 token
+   *   {type:"done"}                                        — 流式结束
+   *
+   * 利用 streamEvents(v2) 同时捕获工具生命周期和 LLM token 流：
+   * - on_tool_start/on_tool_end → 转为 thinking_step 事件，前端展示"思考过程"
+   * - on_chat_model_stream → 转为 token 事件，前端以打字机效果展示最终回复
    */
   async *chatStream(userId: string, message: string, conversationId?: string): AsyncGenerator<string> {
     const conversation = await this.getOrCreateConversation(userId, conversationId);
     const history = conversation.getMessages();
 
     let reply = '';
+    const thinkingSteps: string[] = [];
     if (this.openaiApiKey && this.toolsService) {
       try {
         const executor = this.buildExecutor(history);
-        const stream = await executor.stream({
-          input: message,
-          chat_history: this.toHistory(history),
-        });
+        const eventStream = executor.streamEvents(
+          { input: message, chat_history: this.toHistory(history) },
+          { version: 'v2' },
+        );
 
-        for await (const chunk of stream) {
-          // AgentExecutor stream 产出包含 steps/intermediate_steps 与最终 output
-          // 仅在最终 output 文本阶段向外推送 token
-          if (chunk && typeof chunk.output === 'string' && chunk.output) {
-            // 整段 output 一次性产出，逐字推送以适配前端打字机
-            for (const ch of chunk.output) {
-              reply += ch;
-              yield ch;
+        for await (const event of eventStream) {
+          // ---- 工具生命周期事件 → 思考步骤 ----
+          if (event.event === 'on_tool_start') {
+            const toolName = this.extractToolName(event);
+            const step = `调用工具：${toolName}`;
+            thinkingSteps.push(step);
+            yield JSON.stringify({ type: 'thinking_step', content: step });
+          } else if (event.event === 'on_tool_end') {
+            const toolName = this.extractToolName(event);
+            const step = `${toolName} 执行完成`;
+            thinkingSteps.push(step);
+            yield JSON.stringify({ type: 'thinking_step', content: step });
+          }
+          // ---- LLM token 流 → 回复 token ----
+          else if (event.event === 'on_chat_model_stream') {
+            const chunk: any = event?.data?.chunk;
+            const token: string =
+              chunk && typeof chunk.content === 'string'
+                ? chunk.content
+                : Array.isArray(chunk?.content)
+                  ? chunk.content
+                      .map((c: any) => (typeof c === 'string' ? c : c?.text || ''))
+                      .join('')
+                  : '';
+            if (token) {
+              reply += token;
+              yield JSON.stringify({ type: 'token', content: token });
             }
           }
         }
         if (!reply) {
           reply = '（未产生回复）';
-          yield reply;
+          yield JSON.stringify({ type: 'token', content: reply });
         }
       } catch (e) {
         this.logger.error('Agent 流式执行失败，降级模拟流式回复', (e as Error).stack);
         reply = this.fallbackReply(message);
-        for (const ch of reply) yield ch;
+        thinkingSteps.push('调用工具：降级模拟');
+        yield JSON.stringify({ type: 'thinking_step', content: '调用工具：降级模拟' });
+        yield JSON.stringify({ type: 'token', content: reply });
       }
     } else {
       this.logger.warn('未配置 OPENAI_API_KEY 或工具服务，使用模拟流式回复');
       reply = this.fallbackReply(message);
-      for (const ch of reply) yield ch;
+      thinkingSteps.push('未配置 AI，返回模拟回复');
+      yield JSON.stringify({ type: 'thinking_step', content: '未配置 AI，返回模拟回复' });
+      for (const ch of reply) {
+        yield JSON.stringify({ type: 'token', content: ch });
+      }
     }
 
+    yield JSON.stringify({ type: 'done' });
+
     history.push({ role: 'user', content: message, timestamp: new Date().toISOString() });
-    history.push({ role: 'assistant', content: reply, timestamp: new Date().toISOString() });
+    const assistantMsg: AiMessage = { role: 'assistant', content: reply, timestamp: new Date().toISOString() };
+    if (thinkingSteps.length) {
+      assistantMsg.thinkingSteps = thinkingSteps;
+    }
+    history.push(assistantMsg);
     conversation.setMessages(history);
     if (conversation.title === '新会话') {
       conversation.title = message.slice(0, 20);
     }
     await this.conversationRepository.save(conversation);
+  }
+
+  /** 从 LangChain 工具事件中提取工具中文名 */
+  private extractToolName(event: any): string {
+    // 工具中文名映射：LangChain 工具名 → 中文展示名
+    const nameMap: Record<string, string> = {
+      search_knowledge_base: '知识库检索',
+      get_approval_stats: '审批统计',
+      get_dashboard_report: '仪表盘报表',
+    };
+    const rawName: string =
+      event?.name || event?.data?.name || event?.data?.tool_name || 'unknown';
+    return nameMap[rawName] || rawName.replace(/_/g, ' ');
   }
 
   private async getOrCreateConversation(userId: string, conversationId?: string) {

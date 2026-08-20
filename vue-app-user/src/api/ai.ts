@@ -54,11 +54,17 @@ export const agentChat = (payload: { message: string; conversationId?: string })
  * EventSource 不支持自定义 Header（无法带 Authorization），故采用
  * fetch + ReadableStream + TextDecoder 解析 SSE data 帧。
  *
- * NestJS @Sse 对 Observable<string> 会以 `data: "token"\n\n` 形式推送
- * （字符串被 JSON 编码），故此处对 data 先尝试 JSON.parse，失败则按原始文本处理。
+ * 后端 SSE 事件协议（JSON 字符串）：
+ *   {type: 'thinking_step', content: '调用工具：知识库检索'}  — 思考步骤
+ *   {type: 'token', content: '回复文本片段'}                — 最终回复 token
+ *   {type: 'done'}                                          — 流式结束
+ *
+ * NestJS @Sse 会将字符串以 JSON 编码（带引号），故需二次 JSON.parse 解码。
  */
 export interface AgentStreamCallbacks {
   onToken: (token: string) => void
+  /** 思考步骤回调：工具调用开始/完成 */
+  onThinkingStep?: (step: string) => void
   onDone: (fullText: string, conversationId?: string) => void
   onError: (err: unknown) => void
 }
@@ -102,28 +108,55 @@ export const agentStream = async (
       buffer = events.pop() || ''
 
       for (const evt of events) {
-        const dataLine = evt
+        // SSE 规范：一个 event 内多行 `data:` 须用 `\n` 拼接为完整 payload。
+        // NestJS @Sse 对字符串值不做 JSON 编码（直接透传），对对象值才 JSON 编码。
+        const dataLines = evt
           .split('\n')
-          .find((l) => l.startsWith('data:'))
-        if (!dataLine) continue
+          .filter((l) => l.startsWith('data:'))
+          .map((l) => l.slice(5).replace(/^[ ]/, ''))
+        if (!dataLines.length) continue
 
-        const raw = dataLine.slice(5).trim()
+        const raw = dataLines.join('\n')
         if (raw === '[DONE]') {
           cb.onDone(fullText)
           return
         }
 
-        // NestJS @Sse 会将 string 以 JSON 编码（带引号），尝试解码
-        let text: string
+        // 解析策略：
+        // 1) 尝试 JSON.parse — 若成功且是带 type 的对象 → 结构化事件
+        // 2) 若成功且是字符串 → NestJS 编码的旧协议文本
+        // 3) 若失败 → 纯文本 token（旧协议降级）
+        let handled = false
         try {
           const parsed = JSON.parse(raw)
-          text = typeof parsed === 'string' ? parsed : String(parsed)
+          if (parsed && typeof parsed === 'object' && 'type' in parsed) {
+            // 后端 v2 结构化事件：{type: 'token'|'thinking_step'|'done', content?: string}
+            const e = parsed as { type: string; content?: string }
+            if (e.type === 'thinking_step' && e.content) {
+              cb.onThinkingStep?.(e.content)
+              handled = true
+            } else if (e.type === 'token' && e.content) {
+              fullText += e.content
+              cb.onToken(e.content)
+              handled = true
+            } else if (e.type === 'done') {
+              cb.onDone(fullText)
+              return
+            }
+          } else if (typeof parsed === 'string') {
+            // NestJS 编码的字符串（旧协议）：直接作为 token
+            fullText += parsed
+            cb.onToken(parsed)
+            handled = true
+          }
         } catch {
-          text = raw
+          // JSON.parse 失败 → 纯文本 token
         }
 
-        fullText += text
-        cb.onToken(text)
+        if (!handled) {
+          fullText += raw
+          cb.onToken(raw)
+        }
       }
     }
     cb.onDone(fullText)

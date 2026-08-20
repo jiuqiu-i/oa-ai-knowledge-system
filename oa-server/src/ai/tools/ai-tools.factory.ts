@@ -17,8 +17,8 @@ import { AiToolsService } from './ai-tools.service';
 export function buildAiTools(toolsService: AiToolsService): DynamicStructuredTool[] {
   // 工具1：知识库检索
   const searchTool = tool(
-    async (input: { keyword: string; limit?: number }) => {
-      const result = await toolsService.searchKnowledgeBase(input.keyword, input.limit ?? 5);
+    async (input: { keyword: string; limit: number }) => {
+      const result = await toolsService.searchKnowledgeBase(input.keyword, input.limit || 5);
       return JSON.stringify(result);
     },
     {
@@ -34,8 +34,7 @@ export function buildAiTools(toolsService: AiToolsService): DynamicStructuredToo
           .positive()
           .min(1)
           .max(20)
-          .optional()
-          .describe('返回文档数量上限，默认 5'),
+          .describe('返回文档数量上限，默认 5；无明确数量需求时填 5'),
       }) as any,
     },
   );
@@ -57,8 +56,8 @@ export function buildAiTools(toolsService: AiToolsService): DynamicStructuredToo
 
   // 工具3：仪表盘报表
   const dashboardTool = tool(
-    async (input: { days?: number }) => {
-      const result = await toolsService.getDashboardReport(input.days ?? 7);
+    async (input: { days: number }) => {
+      const result = await toolsService.getDashboardReport(input.days || 7);
       return JSON.stringify(result);
     },
     {
@@ -73,8 +72,7 @@ export function buildAiTools(toolsService: AiToolsService): DynamicStructuredToo
           .positive()
           .min(1)
           .max(90)
-          .optional()
-          .describe('趋势统计天数，默认 7 天'),
+          .describe('趋势统计天数，默认 7；无明确趋势时长需求时填 7'),
       }) as any,
     },
   );

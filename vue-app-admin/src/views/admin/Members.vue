@@ -15,8 +15,7 @@ import {
   NPagination,
   NGrid,
   NGridItem,
-  useMessage,
-  useDialog
+  useMessage
 } from 'naive-ui'
 import {
   Search,
@@ -31,8 +30,11 @@ import type { User, UserRole, UserStatus } from '@/types'
 import { useMemberStore } from '@/stores'
 
 const message = useMessage()
-const dialog = useDialog()
 const memberStore = useMemberStore()
+
+// 删除确认弹窗
+const showDeleteModal = ref(false)
+const pendingDeleteMember = ref<User | null>(null)
 
 const searchKeyword = ref('')
 const statusFilter = ref<string | null>(null)
@@ -239,17 +241,17 @@ function toggleStatus(row: User) {
 }
 
 function confirmDelete(row: User) {
-  dialog.warning({
-    title: '确认删除',
-    content: '删除后无法恢复，确定要移除该成员吗？',
-    positiveText: '确认删除',
-    negativeText: '取消',
-    onPositiveClick: async () => {
-      await memberStore.deleteMember(row.id)
-      message.success(`已删除成员：${row.name}`)
-      resetAndFetch()
-    }
-  })
+  pendingDeleteMember.value = row
+  showDeleteModal.value = true
+}
+
+async function executeDelete() {
+  if (!pendingDeleteMember.value) return
+  await memberStore.deleteMember(pendingDeleteMember.value.id)
+  message.success(`已删除成员：${pendingDeleteMember.value.name}`)
+  showDeleteModal.value = false
+  pendingDeleteMember.value = null
+  resetAndFetch()
 }
 </script>
 
@@ -340,6 +342,17 @@ function confirmDelete(row: User) {
         <n-space justify="end">
           <n-button @click="closeModal">取消</n-button>
           <n-button type="primary" @click="submitMember">提交</n-button>
+        </n-space>
+      </template>
+    </n-modal>
+
+    <!-- 删除确认弹窗 -->
+    <n-modal v-model:show="showDeleteModal" preset="dialog" title="确认删除" :show-icon="false">
+      <span>删除后无法恢复，确定要移除该成员吗？</span>
+      <template #action>
+        <n-space justify="end" :size="12">
+          <n-button @click="showDeleteModal = false">取消</n-button>
+          <n-button type="error" @click="executeDelete">确认删除</n-button>
         </n-space>
       </template>
     </n-modal>

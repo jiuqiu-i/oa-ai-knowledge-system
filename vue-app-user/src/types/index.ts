@@ -57,6 +57,8 @@ export interface AiMessage {
   typing?: boolean
   /** Agent 流式输出进行中（实时追加 + 光标） */
   streaming?: boolean
+  /** 思考步骤列表（流式期间捕获的工具调用轨迹） */
+  thinkingSteps?: string[]
 }
 
 export interface AiSession {

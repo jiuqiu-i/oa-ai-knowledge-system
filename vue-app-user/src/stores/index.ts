@@ -439,7 +439,7 @@ export const useAiStore = defineStore('ai', () => {
     messages.value = []
     try {
       const { data } = await getConversation(id)
-      const detail = data as { messages?: Array<{ role: string; content: string }> }
+      const detail = data as { messages?: Array<{ role: string; content: string; thinkingSteps?: string[] }> }
       if (detail?.messages?.length) {
         messages.value = detail.messages
           .filter((m) => m.role === 'user' || m.role === 'assistant')
@@ -448,6 +448,7 @@ export const useAiStore = defineStore('ai', () => {
             role: m.role as 'user' | 'assistant',
             content: m.content,
             typing: false,
+            thinkingSteps: m.thinkingSteps ?? [],
           }))
       }
     } catch {
@@ -545,6 +546,7 @@ export const useAiStore = defineStore('ai', () => {
       role: 'assistant',
       content: '',
       streaming: true,
+      thinkingSteps: [],
     })
     isTyping.value = true
 
@@ -553,6 +555,10 @@ export const useAiStore = defineStore('ai', () => {
     await agentStream(
       { message: content, conversationId: currentConversationId.value },
       {
+        onThinkingStep: (step) => {
+          const msg = messages.value.find((m) => m.id === assistantId)
+          if (msg) msg.thinkingSteps!.push(step)
+        },
         onToken: (token) => {
           const msg = messages.value.find((m) => m.id === assistantId)
           if (msg) msg.content += token
