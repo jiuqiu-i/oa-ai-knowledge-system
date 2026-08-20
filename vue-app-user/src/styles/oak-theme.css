@@ -6,6 +6,8 @@
   --oak-popover: #FFFFFF;
   --oak-popover-foreground: #2A261F;
   --oak-primary: #E58A2E;
+  --oak-primary-hover: #F2A24D;
+  --oak-primary-pressed: #D07A25;
   --oak-primary-foreground: #FFFFFF;
   --oak-muted: #F7F4EF;
   --oak-muted-foreground: #6E665B;
@@ -45,6 +47,8 @@
   --oak-popover: #1E1A14;
   --oak-popover-foreground: #F5F1EA;
   --oak-primary: #F2A24D;
+  --oak-primary-hover: #F5B86A;
+  --oak-primary-pressed: #E58A2E;
   --oak-primary-foreground: #2A261F;
   --oak-muted: #2A261F;
   --oak-muted-foreground: #A7A096;
