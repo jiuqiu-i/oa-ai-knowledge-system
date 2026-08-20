@@ -17,12 +17,27 @@
       />
 
       <n-space align="center" :wrap="false">
-        <n-button v-if="!userStore.isLoggedIn" ghost type="primary" @click="goLogin">
-          登录
-        </n-button>
-        <n-button type="primary" @click="goHome">
-          开始使用
-        </n-button>
+        <template v-if="!userStore.isLoggedIn">
+          <n-button ghost type="primary" @click="goLogin">
+            登录
+          </n-button>
+          <n-button type="primary" @click="goHome">
+            开始使用
+          </n-button>
+        </template>
+        <template v-else>
+          <n-dropdown :options="userDropdownOptions" @select="onUserDropdownSelect">
+            <n-button quaternary>
+              <template #icon>
+                <span class="user-avatar">{{ avatarChar }}</span>
+              </template>
+              {{ userStore.user.name }}
+            </n-button>
+          </n-dropdown>
+          <n-button type="primary" @click="goHome">
+            进入工作台
+          </n-button>
+        </template>
       </n-space>
     </div>
   </n-layout-header>
@@ -31,8 +46,8 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NLayoutHeader, NMenu, NSpace, NButton } from 'naive-ui'
-import type { MenuOption } from 'naive-ui'
+import { NLayoutHeader, NMenu, NSpace, NButton, NDropdown } from 'naive-ui'
+import type { MenuOption, DropdownOption } from 'naive-ui'
 import { Layers, Home, BookOpen, Bot, LayoutDashboard } from 'lucide-vue-next'
 import { useUserStore } from '@/stores'
 import type { Component } from 'vue'
@@ -40,6 +55,24 @@ import type { Component } from 'vue'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+
+// 已登录用户头像首字
+const avatarChar = computed(() => userStore.user.name?.charAt(0) || 'U')
+
+// 用户下拉菜单
+const userDropdownOptions = computed<DropdownOption[]>(() => [
+  { label: '工作台', key: 'home' },
+  { label: '退出登录', key: 'logout' }
+])
+
+const onUserDropdownSelect = (key: string) => {
+  if (key === 'home') {
+    router.push('/home')
+  } else if (key === 'logout') {
+    userStore.logout()
+    router.push('/')
+  }
+}
 
 interface MenuItem {
   key: string
@@ -134,5 +167,17 @@ const goHome = () => router.push('/home')
 }
 :deep(.n-menu-item-content--selected) {
   background: var(--oak-muted) !important;
+}
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--oak-primary);
+  color: var(--oak-primary-foreground);
+  font-size: 12px;
+  font-weight: 600;
 }
 </style>
