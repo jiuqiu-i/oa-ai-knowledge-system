@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, h, onMounted, watch, nextTick } from 'vue'
-import type { DataTableColumns, FormInst, FormRules, TreeOption, SelectOption, UploadFileInfo } from 'naive-ui'
+import type { DataTableColumns, FormInst, FormRules, TreeOption, SelectOption, UploadFileInfo, UploadCustomRequestOptions } from 'naive-ui'
 import {
   NCard,
   NInput,
@@ -37,14 +37,25 @@ import {
   Pencil,
   Trash2,
   UploadCloud,
-  RefreshCw
+  RefreshCw,
+  Paperclip,
+  Download
 } from 'lucide-vue-next'
 import type { KbDoc, KbDocStatus } from '@/types'
 import { useKbStore } from '@/stores'
-import { getKbDocumentDetail } from '@/api/kb'
+import { getKbDocumentDetail, uploadKbFile } from '@/api/kb'
 
 const message = useMessage()
 const kbStore = useKbStore()
+
+/** 拼接附件完整可访问 URL（后端静态资源挂载在 /uploads，非 /api 前缀下）*/
+function getAttachmentUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api') as string
+  const origin = apiBase.replace(/\/api\/?$/, '')
+  return `${origin}${path}`
+}
 
 // 删除确认弹窗
 const showDeleteModal = ref(false)
@@ -179,12 +190,16 @@ const formValue = ref({
   content: ''
 })
 const fileList = ref<UploadFileInfo[]>([])
+const uploadedFileUrl = ref<string | null>(null)
+const uploading = ref(false)
 
 const rules: FormRules = {
   title: { required: true, message: '请输入文档标题', trigger: 'blur' },
   category: { required: true, message: '请选择分类', trigger: 'change' },
   status: { required: true, message: '请选择状态', trigger: 'change' }
 }
+
+const ACCEPT_TYPES = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.zip,.rar,.png,.jpg,.jpeg,.gif'
 
 function openDocModal(mode: 'upload' | 'edit', row: KbDoc | null = null) {
   modalMode.value = mode
@@ -196,10 +211,20 @@ function openDocModal(mode: 'upload' | 'edit', row: KbDoc | null = null) {
       status: row.status,
       content: row.content || ''
     }
+    // 编辑模式：若已有附件，在列表中回显文件名
+    if (row.attachment) {
+      const filename = row.attachment.split('/').pop() || '附件'
+      fileList.value = [{ id: String(row.id), name: filename, status: 'finished' }]
+      uploadedFileUrl.value = row.attachment
+    } else {
+      fileList.value = []
+      uploadedFileUrl.value = null
+    }
   } else {
     const defaultCat = categoryFormOptions.value[0]?.value as string | undefined
     formValue.value = { title: '', category: defaultCat ?? null, status: '已发布', content: '' }
     fileList.value = []
+    uploadedFileUrl.value = null
   }
   showDocModal.value = true
 }
@@ -207,11 +232,45 @@ function openDocModal(mode: 'upload' | 'edit', row: KbDoc | null = null) {
 function closeDocModal() {
   showDocModal.value = false
   editingDoc.value = null
+  uploadedFileUrl.value = null
+  uploading.value = false
+}
+
+/** NUpload 自定义请求：真正调用后端上传接口 */
+async function customUpload({ file, onFinish, onError }: UploadCustomRequestOptions) {
+  const rawFile = file.file
+  if (!rawFile) {
+    onError()
+    return
+  }
+  uploading.value = true
+  try {
+    const { data } = await uploadKbFile(rawFile)
+    uploadedFileUrl.value = data.url
+    message.success(`文件「${data.originalname}」上传成功`)
+    onFinish()
+  } catch {
+    message.error('文件上传失败，请重试')
+    uploadedFileUrl.value = null
+    onError()
+  } finally {
+    uploading.value = false
+  }
+}
+
+/** 移除已上传文件时清空 URL */
+function onFileRemove() {
+  uploadedFileUrl.value = null
+  return true
 }
 
 async function submitDoc() {
   const errors = await new Promise<unknown>((resolve) => formRef.value?.validate(resolve))
   if (errors) return
+  if (uploading.value) {
+    message.warning('文件正在上传中，请稍候...')
+    return
+  }
   const payload = {
     title: formValue.value.title,
     category: formValue.value.category as string,
@@ -219,9 +278,10 @@ async function submitDoc() {
     status: formValue.value.status,
     statusType: getStatusType(formValue.value.status),
     content: formValue.value.content,
-    attachment: fileList.value[0]?.name || null
+    attachment: uploadedFileUrl.value
   }
   if (modalMode.value === 'edit' && editingDoc.value) {
+    console.log(payload)
     await kbStore.updateDocument(editingDoc.value.id, payload)
     message.success('文档已更新')
   } else {
@@ -240,7 +300,7 @@ const docDetailLoading = ref(false)
 async function viewDoc(row: KbDoc) {
   docDetailVisible.value = true
   activeDoc.value = { ...row }
-  // 尝试从后端拿详情内容（含 content / summary / tags / views 等）
+  // 尝试从后端拿详情内容（含 content / summary / tags / views / attachment 等）
   docDetailLoading.value = true
   try {
     const { data } = await getKbDocumentDetail(String(row.id))
@@ -249,7 +309,8 @@ async function viewDoc(row: KbDoc) {
       content: data.content || activeDoc.value?.content,
       category: data.category || activeDoc.value?.category,
       author: data.author?.name || activeDoc.value?.author,
-      updatedAt: (data.updatedAt || data.createdAt || '').slice(0, 10)
+      updatedAt: (data.updatedAt || data.createdAt || '').slice(0, 10),
+      attachment: data.attachment ?? activeDoc.value?.attachment ?? null
     }
   } catch {
     // 若后端无详情接口，保留表格行数据即可
@@ -372,15 +433,25 @@ function createCategory() {
         <n-form-item label="文档内容">
           <n-input v-model:value="formValue.content" type="textarea" :rows="5" placeholder="请输入文档内容（可选）" />
         </n-form-item>
-        <n-form-item label="上传附件（演示，不真正上传）">
-          <n-upload v-model:file-list="fileList" :max="1" :show-file-list="true">
+        <n-form-item label="上传附件">
+          <n-upload
+            v-model:file-list="fileList"
+            :max="1"
+            :show-file-list="true"
+            :custom-request="customUpload"
+            :accept="ACCEPT_TYPES"
+            @remove="onFileRemove"
+          >
             <n-upload-dragger>
               <div style="margin-bottom: 8px">
                 <n-icon size="32" :depth="3">
                   <UploadCloud />
                 </n-icon>
               </div>
-              <n-text style="font-size: 14px">点击选择文件（演示模式）</n-text>
+              <n-text style="font-size: 14px">点击或拖拽文件到此处上传</n-text>
+              <n-text depth="3" style="font-size: 12px; display: block; margin-top: 4px">
+                支持 PDF/Word/Excel/PPT/TXT/图片/压缩包，最大 20MB
+              </n-text>
             </n-upload-dragger>
           </n-upload>
         </n-form-item>
@@ -416,6 +487,21 @@ function createCategory() {
                 <div class="doc-body">
                   {{ activeDoc.content || '（该文档暂未提供详情内容）' }}
                 </div>
+              </div>
+              <div v-if="getAttachmentUrl(activeDoc.attachment)">
+                <div style="font-size: 14px; font-weight: 600; color: #2A261F; margin-bottom: 8px;">附件</div>
+                <a
+                  :href="getAttachmentUrl(activeDoc.attachment)!"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="attachment-link"
+                >
+                  <n-space align="center" :size="8">
+                    <n-icon :component="Paperclip" :size="16" color="#E58A2E" />
+                    <span>{{ activeDoc.attachment?.split('/').pop() }}</span>
+                    <n-icon :component="Download" :size="14" color="#9F968A" />
+                  </n-space>
+                </a>
               </div>
             </n-space>
           </n-spin>
@@ -510,6 +596,23 @@ function createCategory() {
   white-space: pre-wrap;
   max-height: 50vh;
   overflow: auto;
+}
+
+.attachment-link {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #F7F4EF;
+  border: 1px solid #E8E2D9;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #E58A2E;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.attachment-link:hover {
+  background: #FFF8EE;
+  border-color: #E58A2E;
 }
 
 @media (max-width: 768px) {

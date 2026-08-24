@@ -75,6 +75,40 @@ export class AiToolsService {
   }
 
   /**
+   * 工具4：知识库文档详情
+   * 按文档 ID 查询完整内容（含正文），供大模型在检索后深入回答文档具体内容类问题。
+   * 与 searchKnowledgeBase 互补：检索仅返回摘要，详情返回正文。
+   * 未找到时返回 { found: false } 而非抛错，便于大模型自行组织"未找到"回复。
+   */
+  async getKnowledgeBaseDetail(id: string) {
+    this.logger.log(`[tool] getKnowledgeBaseDetail: id="${id}"`);
+    const doc = await this.kbRepository
+      .createQueryBuilder('kb')
+      .leftJoin('kb.author', 'author')
+      .select([
+        'kb.id AS id',
+        'kb.title AS title',
+        'kb.category AS category',
+        'kb.tags AS tags',
+        'kb.summary AS summary',
+        'kb.content AS content',
+        'kb.views AS views',
+        'kb.attachment AS attachment',
+        'author.name AS author',
+        'author.dept AS authorDept',
+        'kb.createdAt AS createdAt',
+        'kb.updatedAt AS updatedAt',
+      ])
+      .where('kb.id = :id', { id })
+      .getRawOne();
+
+    if (!doc) {
+      return { found: false, id };
+    }
+    return { found: true, doc };
+  }
+
+  /**
    * 工具2：审批统计
    * 汇总各状态、各类型、各紧急度的审批数量，大模型可据此生成"我的待办概览"。
    */

@@ -41,6 +41,9 @@ export class KnowledgeBase {
   @Column({ type: 'longtext' })
   content: string;
 
+  @Column({ length: 500, nullable: true })
+  attachment: string | null;
+
   @Column({ name: 'author_id' })
   authorId: string;
 

@@ -27,4 +27,9 @@ export class UpdateKbDto {
   @IsOptional()
   @IsString()
   content?: string;
+
+  @ApiProperty({ required: false, description: '附件访问路径' })
+  @IsOptional()
+  @IsString()
+  attachment?: string | null;
 }

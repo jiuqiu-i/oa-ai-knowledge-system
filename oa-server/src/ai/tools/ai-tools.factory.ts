@@ -5,10 +5,11 @@ import { AiToolsService } from './ai-tools.service';
 /**
  * LangChain 工具函数集 - 暴露给大模型的"后端能力 Schema"
  *
- * 三个工具满足考核要求："至少 3 个 AI 可调用工具函数封装"：
- *   1. search_knowledge_base  - 知识库检索（自然语言→结构化召回）
- *   2. get_approval_stats     - 审批统计汇总（数据库→智能报表）
- *   3. get_dashboard_report   - 仪表盘运营报表（多表聚合→周报/日报）
+ * 四个工具满足考核要求："至少 3 个 AI 可调用工具函数封装"：
+ *   1. search_knowledge_base      - 知识库检索（自然语言→结构化召回，仅摘要）
+ *   2. get_knowledge_base_detail  - 知识库文档详情（按 ID 取正文，补充检索）
+ *   3. get_approval_stats         - 审批统计汇总（数据库→智能报表）
+ *   4. get_dashboard_report       - 仪表盘运营报表（多表聚合→周报/日报）
  *
  * 注：zod schema 与 LangChain tool() 泛型组合会触发 TS 深度泛型实例化，
  *     导致 TS2589 告警与编译期内存溢出。此处将 schema 断言为 any 阻断推断，
@@ -77,7 +78,25 @@ export function buildAiTools(toolsService: AiToolsService): DynamicStructuredToo
     },
   );
 
+  // 工具4：知识库文档详情
+  const detailTool = tool(
+    async (input: { id: string }) => {
+      const result = await toolsService.getKnowledgeBaseDetail(input.id);
+      return JSON.stringify(result);
+    },
+    {
+      name: 'get_knowledge_base_detail',
+      description:
+        '按文档 ID 获取知识库文档详情（含正文）。当用户想查看某篇文档的完整内容、' +
+        '或针对检索结果中的某篇文档追问具体细节时调用。需先通过 search_knowledge_base ' +
+        '拿到文档 id，再调用本工具读取正文。未找到时返回 found:false。',
+      schema: z.object({
+        id: z.string().describe('知识库文档 ID（UUID），来自 search_knowledge_base 返回结果'),
+      }) as any,
+    },
+  );
+
   // 运行期 tool() 在传入 zod schema 时产出 DynamicStructuredTool，
   // 此处经 unknown 中转断言以规避 zod 深度泛型推断导致的 TS2589/内存溢出
-  return [searchTool, approvalStatsTool, dashboardTool] as unknown as DynamicStructuredTool[];
+  return [searchTool, approvalStatsTool, dashboardTool, detailTool] as unknown as DynamicStructuredTool[];
 }

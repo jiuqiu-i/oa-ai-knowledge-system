@@ -116,7 +116,7 @@
 
         <!-- Main -->
         <div class="main-area">
-          <section class="doc-section">
+          <section class="doc-section" v-if="false">
             <div class="section-bar">
               <h2 class="oak-h2" style="font-size: 20px;">热门知识</h2>
               <n-button text type="primary" @click="viewAllHot">查看全部</n-button>
@@ -259,7 +259,7 @@ const sortOptions: SelectOption[] = [
   { label: '最热', value: 'hottest' }
 ]
 
-const hotTags = ['入职指引', 'API 文档', '报销流程', '产品 Roadmap']
+const hotTags = ['入职指南', '前端开发规范', '报销规范', 'FAQ']
 
 const performSearch = async () => {
   const kw = searchInput.value.trim()

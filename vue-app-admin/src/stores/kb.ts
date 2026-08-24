@@ -24,7 +24,7 @@ const formatApiToView = (d: ApiKbDoc): KbDoc => ({
   status: '已发布',
   statusType: 'success',
   content: d.content,
-  attachment: null
+  attachment: d.attachment ?? null
 })
 
 export const useKbStore = defineStore('kb', () => {
@@ -71,6 +71,7 @@ export const useKbStore = defineStore('kb', () => {
         title: payload.title,
         category: payload.category,
         content: payload.content || '',
+        attachment: payload.attachment ?? null,
       })
       documents.value.unshift(formatApiToView(data))
     } catch {
@@ -89,6 +90,7 @@ export const useKbStore = defineStore('kb', () => {
         title: payload.title,
         category: payload.category,
         content: payload.content,
+        attachment: payload.attachment,
       })
       const updated = formatApiToView(data)
       const index = documents.value.findIndex((d) => String(d.id) === String(id))

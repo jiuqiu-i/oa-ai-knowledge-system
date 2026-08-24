@@ -2,11 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+
+  // 静态文件服务：映射 /uploads -> uploads/ 目录，供知识库附件访问
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   // 接入 Winston 日志（控制台彩色 + 文件按日轮转）
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));

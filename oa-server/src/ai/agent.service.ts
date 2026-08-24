@@ -43,10 +43,13 @@ export class AgentService {
     const envTopP = this.configService.get<string>('OPENAI_TOP_P');
     this.openaiTopP = envTopP === undefined ? 0.95 : Number(envTopP);
     this.systemPrompt =
-      '你是一位 OA 办公智能助手，可以调用工具查询知识库、审批统计、仪表盘报表。' +
-      '收到用户指令后：1) 判断是否需要调用工具获取实时数据；2) 需要时调用合适工具；' +
-      '3) 基于工具返回的结构化数据用简洁中文给出回答或报表。' +
-      '无需工具时直接回答。不要编造数据。';
+      '你是一位 OA 办公智能助手，可以调用工具查询知识库、审批统计、仪表盘报表。\n' +
+      '回答策略：\n' +
+      '1) 优先检索知识库：当用户提出知识/文档/规范/制度/流程类问题时，先调用 search_knowledge_base 按关键词检索相关文档。\n' +
+      '2) 命中即取详情：若检索结果非空，选取与用户问题最相关的 1-2 篇文档，调用 get_knowledge_base_detail 获取正文，基于其真实内容回答用户问题，并在回答末尾注明来源文档标题；禁止照搬全文，应提炼要点。\n' +
+      '3) 未命中如实说明：若知识库无相关文档，明确告知用户知识库中暂无相关内容，必要时再调用其他工具或基于通用知识作答，严禁编造知识库中不存在的内容或文档。\n' +
+      '4) 审批/报表类问题：按需调用 get_approval_stats 或 get_dashboard_report，用结构化数据给出回答或报表。\n' +
+      '5) 无需工具时直接回答。所有回复使用简洁中文。';
   }
 
   setToolsService(toolsService: AiToolsService) {
@@ -74,7 +77,8 @@ export class AgentService {
     ]);
 
     const agent = createToolCallingAgent({ llm, tools, prompt });
-    return new AgentExecutor({ agent, tools, verbose: false, maxIterations: 5 });
+    // 知识库优先策略需"检索→取详情→回答"多步工具调用，迭代上限放宽至 8
+    return new AgentExecutor({ agent, tools, verbose: false, maxIterations: 8 });
   }
 
   /** 将本地消息结构转为 LangChain 消息 */
@@ -223,6 +227,7 @@ export class AgentService {
     // 工具中文名映射：LangChain 工具名 → 中文展示名
     const nameMap: Record<string, string> = {
       search_knowledge_base: '知识库检索',
+      get_knowledge_base_detail: '知识库文档详情',
       get_approval_stats: '审批统计',
       get_dashboard_report: '仪表盘报表',
     };

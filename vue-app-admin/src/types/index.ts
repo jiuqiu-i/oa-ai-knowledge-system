@@ -241,6 +241,7 @@ export interface ApiKbDoc {
   tags: string[]
   summary: string | null
   content: string
+  attachment: string | null
   authorId: string
   views: number
   createdAt: string
@@ -270,6 +271,15 @@ export interface CreateKbPayload {
   tags?: string[]
   summary?: string
   content: string
+  attachment?: string | null
+}
+
+export interface UploadKbFileResult {
+  filename: string
+  originalname: string
+  size: number
+  mimetype: string
+  url: string
 }
 
 export interface ApiDashboardStats {

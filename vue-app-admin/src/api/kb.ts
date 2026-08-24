@@ -4,7 +4,8 @@ import type {
   ApiKbDoc,
   CreateKbPayload,
   KbQueryParams,
-  PaginatedData
+  PaginatedData,
+  UploadKbFileResult
 } from '@/types'
 
 /**
@@ -45,4 +46,15 @@ export function updateKbDocument(id: string, data: Partial<CreateKbPayload>) {
 /** 删除文档 */
 export function deleteKbDocument(id: string) {
   return request.delete<{ id: string }>(`/knowledge-base/${id}`)
+}
+
+/** 上传知识库附件（multipart/form-data）*/
+export function uploadKbFile(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post<UploadKbFileResult>('/knowledge-base/upload', formData, {
+    // 不手动设置 Content-Type，让浏览器自动生成带 boundary 的 multipart/form-data
+    headers: { 'Content-Type': undefined },
+    timeout: 60000
+  })
 }

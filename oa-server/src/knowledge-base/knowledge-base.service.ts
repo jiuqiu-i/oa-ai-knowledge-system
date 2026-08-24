@@ -40,6 +40,7 @@ export class KnowledgeBaseService {
       ...dto,
       authorId: userId,
       tags: dto.tags || [],
+      attachment: dto.attachment ?? null,
     });
     const saved = await this.kbRepository.save(doc);
     // 写后失效：热门列表与分类受影响
